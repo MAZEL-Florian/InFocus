@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\UserController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -16,3 +17,9 @@ use Illuminate\Support\Facades\Route;
 Route::get('/', function () {
     return view('welcome');
 });
+
+// Route pour ajouter un utilisateur
+Route::post('/users', [UserController::class, 'store']);
+
+// Route pour supprimer un utilisateur
+Route::delete('/users/{id}', [UserController::class, 'destroy']);
