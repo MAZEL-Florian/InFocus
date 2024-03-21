@@ -4,10 +4,10 @@
 # https://docs.microsoft.com/azure/devops/pipelines/languages/php
 
 trigger:
-- develop
+- dev
 
 pool:
-  vmImage: 'Ubuntu-16.04'
+  default
 
 variables:
   phpVersion: 8.^
