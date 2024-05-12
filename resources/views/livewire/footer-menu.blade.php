@@ -49,7 +49,7 @@
                             <a href="#!" class="text-reset no-underline">Vidéos éducatives</a>
                         </p>
                         <p>
-                            <a href="#!" class="text-reset no-underline">FAQ</a>
+                            <a href="{{ route('faq.index') }}" class="text-reset no-underline">FAQ</a>
                         </p>
                     </div>
                     <!-- Grid column -->

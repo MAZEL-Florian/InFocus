@@ -2,9 +2,9 @@
 
 namespace App\Filament\Resources;
 
-use App\Filament\Resources\PhotoTypeResource\Pages;
-use App\Filament\Resources\PhotoTypeResource\RelationManagers;
-use App\Models\PhotoType;
+use App\Filament\Resources\FaqResource\Pages;
+use App\Filament\Resources\FaqResource\RelationManagers;
+use App\Models\Faq;
 use Filament\Forms;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
@@ -13,9 +13,9 @@ use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
 
-class PhotoTypeResource extends Resource
+class FaqResource extends Resource
 {
-    protected static ?string $model = PhotoType::class;
+    protected static ?string $model = Faq::class;
 
     protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
 
@@ -23,11 +23,13 @@ class PhotoTypeResource extends Resource
     {
         return $form
             ->schema([
-                Forms\Components\TextInput::make('name')
+                Forms\Components\TextInput::make('question')
                     ->required()
                     ->maxLength(255),
-                    Forms\Components\FileUpload::make('image')
+                Forms\Components\Textarea::make('answer')
                     ->required()
+                    ->maxLength(65535)
+                    ->columnSpanFull(),
             ]);
     }
 
@@ -35,17 +37,19 @@ class PhotoTypeResource extends Resource
     {
         return $table
             ->columns([
-                Tables\Columns\TextColumn::make('name')
+                Tables\Columns\TextColumn::make('question')
                     ->searchable(),
-                    Tables\Columns\ImageColumn::make('image')
+                    Tables\Columns\TextColumn::make('answer')
+                    ->limit(50)
                     ->searchable(),
                 Tables\Columns\TextColumn::make('created_at')
                     ->dateTime()
-                    ->sortable(),
-
+                    ->sortable()
+                    ->toggleable(isToggledHiddenByDefault: true),
                 Tables\Columns\TextColumn::make('updated_at')
                     ->dateTime()
-                    ->sortable(),
+                    ->sortable()
+                    ->toggleable(isToggledHiddenByDefault: true),
             ])
             ->filters([
                 //
@@ -70,9 +74,9 @@ class PhotoTypeResource extends Resource
     public static function getPages(): array
     {
         return [
-            'index' => Pages\ListPhotoTypes::route('/'),
-            'create' => Pages\CreatePhotoType::route('/create'),
-            'edit' => Pages\EditPhotoType::route('/{record}/edit'),
+            'index' => Pages\ListFaqs::route('/'),
+            'create' => Pages\CreateFaq::route('/create'),
+            'edit' => Pages\EditFaq::route('/{record}/edit'),
         ];
     }
 }

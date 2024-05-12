@@ -105,7 +105,8 @@
                 <div class="bg-blue-500 col-start-1 col-end-5 p-4 rounded-xl my-4 ml-auto shadow-md">
                     <h3 class="font-semibold text-lg mb-1">Remplis notre formulaire interactif</h3>
                     <p class="leading-tight text-justify">
-                        Lorem ipsum dolor sit amet consectetur. Aliquam amet ullamcorper risus imperdiet tellus quis pellentesque egestas elit. Fermentum ac sit risus.
+                        Lorem ipsum dolor sit amet consectetur. Aliquam amet ullamcorper risus imperdiet tellus quis
+                        pellentesque egestas elit. Fermentum ac sit risus.
                     </p>
                 </div>
                 <div class="col-start-5 col-end-6 md:mx-auto relative mr-10">
@@ -126,7 +127,8 @@
                 <div class="bg-blue-500 col-start-6 col-end-10 p-4 rounded-xl my-4 mr-auto shadow-md">
                     <h3 class="font-semibold text-lg mb-1">Sélectionne le Pack qui te convient</h3>
                     <p class="leading-tight text-justify">
-                        Lorem ipsum dolor sit amet consectetur. Aliquam amet ullamcorper risus imperdiet tellus quis pellentesque egestas elit. Fermentum ac sit risus.
+                        Lorem ipsum dolor sit amet consectetur. Aliquam amet ullamcorper risus imperdiet tellus quis
+                        pellentesque egestas elit. Fermentum ac sit risus.
                     </p>
                 </div>
             </div>
@@ -135,7 +137,8 @@
                 <div class="bg-blue-500 col-start-1 col-end-5 p-4 rounded-xl my-4 ml-auto shadow-md">
                     <h3 class="font-semibold text-lg mb-1">Loue ton matériel et ajuste ton budget</h3>
                     <p class="leading-tight text-justify">
-                        Lorem ipsum dolor sit amet consectetur. Aliquam amet ullamcorper risus imperdiet tellus quis pellentesque egestas elit. Fermentum ac sit risus.
+                        Lorem ipsum dolor sit amet consectetur. Aliquam amet ullamcorper risus imperdiet tellus quis
+                        pellentesque egestas elit. Fermentum ac sit risus.
                     </p>
                 </div>
                 <div class="col-start-5 col-end-6 md:mx-auto relative mr-10">
@@ -166,91 +169,20 @@
                 <div class="w-full h-full mx-auto overflow-x-hidden overflow-y-hidden">
                     <div id="slider"
                         class="h-full flex lg:gap-8 md:gap-6 gap-14 items-center justify-start transition ease-out duration-700">
+                        @foreach($photoTypes as $photoType)
                         <div class="flex flex-shrink-0 relative w-full sm:w-auto group">
                             <a href="#">
-                                <img src="https://i.ibb.co/fDngH9G/carosel-1.png" alt="black chair and white table"
-                                    class="object-cover object-center w-full transition duration-500 ease-in-out transform group-hover:brightness-75" />
+                                <img src="{{ asset('storage/'.$photoType->image) }}" alt="{{ $photoType->name }}"
+                                    class="object-contain h-96 w-96 object-cover object-center transition duration-500 ease-in-out transform group-hover:brightness-75" />
                                 <div
                                     class="bg-gray-800 bg-opacity-30 absolute inset-0 flex items-center justify-center p-6">
                                     <h3
                                         class="text-xl lg:text-2xl font-semibold leading-5 lg:leading-6 text-white dark:text-gray-900">
-                                        Portrait</h3>
+                                        {{ $photoType->name }}</h3>
                                 </div>
                             </a>
                         </div>
-
-                        <div class="flex flex-shrink-0 relative w-full sm:w-auto group">
-                            <a href="#">
-                                <img src="https://i.ibb.co/fDngH9G/carosel-1.png" alt="black chair and white table"
-                                    class="object-cover object-center w-full transition duration-500 ease-in-out transform group-hover:brightness-75" />
-                                <div
-                                    class="bg-gray-800 bg-opacity-30 absolute inset-0 flex items-center justify-center p-6">
-                                    <h3
-                                        class="text-xl lg:text-2xl font-semibold leading-5 lg:leading-6 text-white dark:text-gray-900">
-                                        Paysage</h3>
-                                </div>
-                            </a>
-                        </div>
-                        <div class="flex flex-shrink-0 relative w-full sm:w-auto group">
-                            <a href="#">
-                                <img src="https://i.ibb.co/fDngH9G/carosel-1.png" alt="black chair and white table"
-                                    class="object-cover object-center w-full transition duration-500 ease-in-out transform group-hover:brightness-75" />
-                                <div
-                                    class="bg-gray-800 bg-opacity-30 absolute inset-0 flex items-center justify-center p-6">
-                                    <h3
-                                        class="text-xl lg:text-2xl font-semibold leading-5 lg:leading-6 text-white dark:text-gray-900">
-                                        Mariage</h3>
-                                </div>
-                            </a>
-                        </div>
-                        <div class="flex flex-shrink-0 relative w-full sm:w-auto group">
-                            <a href="#">
-                                <img src="https://i.ibb.co/fDngH9G/carosel-1.png" alt="black chair and white table"
-                                    class="object-cover object-center w-full transition duration-500 ease-in-out transform group-hover:brightness-75" />
-                                <div
-                                    class="bg-gray-800 bg-opacity-30 absolute inset-0 flex items-center justify-center p-6">
-                                    <h3
-                                        class="text-xl lg:text-2xl font-semibold leading-5 lg:leading-6 text-white dark:text-gray-900">
-                                        Nuit</h3>
-                                </div>
-                            </a>
-                        </div>
-                        <div class="flex flex-shrink-0 relative w-full sm:w-auto group">
-                            <a href="#">
-                                <img src="https://i.ibb.co/fDngH9G/carosel-1.png" alt="black chair and white table"
-                                    class="object-cover object-center w-full transition duration-500 ease-in-out transform group-hover:brightness-75" />
-                                <div
-                                    class="bg-gray-800 bg-opacity-30 absolute inset-0 flex items-center justify-center p-6">
-                                    <h3
-                                        class="text-xl lg:text-2xl font-semibold leading-5 lg:leading-6 text-white dark:text-gray-900">
-                                        Animalier</h3>
-                                </div>
-                            </a>
-                        </div>
-                        <div class="flex flex-shrink-0 relative w-full sm:w-auto group">
-                            <a href="#">
-                                <img src="https://i.ibb.co/fDngH9G/carosel-1.png" alt="black chair and white table"
-                                    class="object-cover object-center w-full transition duration-500 ease-in-out transform group-hover:brightness-75" />
-                                <div
-                                    class="bg-gray-800 bg-opacity-30 absolute inset-0 flex items-center justify-center p-6">
-                                    <h3
-                                        class="text-xl lg:text-2xl font-semibold leading-5 lg:leading-6 text-white dark:text-gray-900">
-                                        Sportif</h3>
-                                </div>
-                            </a>
-                        </div>
-                        <div class="flex flex-shrink-0 relative w-full sm:w-auto group">
-                            <a href="#">
-                                <img src="https://i.ibb.co/fDngH9G/carosel-1.png" alt="black chair and white table"
-                                    class="object-cover object-center w-full transition duration-500 ease-in-out transform group-hover:brightness-75" />
-                                <div
-                                    class="bg-gray-800 bg-opacity-30 absolute inset-0 flex items-center justify-center p-6">
-                                    <h3
-                                        class="text-xl lg:text-2xl font-semibold leading-5 lg:leading-6 text-white dark:text-gray-900">
-                                        Studio</h3>
-                                </div>
-                            </a>
-                        </div>
+                        @endforeach
                     </div>
                 </div>
                 <button aria-label="slide forward"
