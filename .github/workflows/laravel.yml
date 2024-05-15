@@ -24,6 +24,8 @@ jobs:
       run: composer install -q --no-ansi --no-interaction --no-scripts --no-progress --prefer-dist
     - name: install npm
       run: npm install
+    - name: build npm
+      run: npm run build
     - name: Generate key
       run: php artisan key:generate
     - name: Storage link
