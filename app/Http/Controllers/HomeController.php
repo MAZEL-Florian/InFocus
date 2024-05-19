@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Partner;
 use App\Models\PhotoType;
 use Illuminate\Http\Request;
 
@@ -13,8 +14,9 @@ class HomeController extends Controller
     public function index()
     {
         $photoTypes = PhotoType::all();
+        $partners = Partner::all();
 
-        return view('home', compact('photoTypes'));
+        return view('home', compact('photoTypes', 'partners'));
     }
 
     /**

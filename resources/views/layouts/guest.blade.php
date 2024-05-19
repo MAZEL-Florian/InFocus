@@ -13,13 +13,16 @@
         <link href="https://fonts.bunny.net/css?family=figtree:400,500,600&display=swap" rel="stylesheet" />
         <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'>
         <!-- Scripts -->
-        @vite(['resources/css/app.css', 'resources/js/app.js'])
+        @vite(['resources/css/app.css', 'resources/css/components.css', 'resources/js/app.js'])
         <link rel="icon" type="image/x-icon" href="/img/Fav blanc couleur.png">
         <link rel="stylesheet" href="https://use.typekit.net/rio1oev.css">
+        <link
+        href="https://fonts.googleapis.com/css2?family=ABeeZee:ital@0;1&family=Quicksand:wght@300..700&family=Ruthie&display=swap"
+        rel="stylesheet">
         <!-- Styles -->
         @livewireStyles
     </head>
-    <body class="bg-infocus-primary" style="font-family: Komet;">
+    <body class="antialiased bg-infocus-twilightblue font-quicksand">
         <div class="antialiased ">
             {{ $slot }}
         </div>

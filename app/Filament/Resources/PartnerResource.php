@@ -2,9 +2,9 @@
 
 namespace App\Filament\Resources;
 
-use App\Filament\Resources\PhotoTypeResource\Pages;
-use App\Filament\Resources\PhotoTypeResource\RelationManagers;
-use App\Models\PhotoType;
+use App\Filament\Resources\PartnerResource\Pages;
+use App\Filament\Resources\PartnerResource\RelationManagers;
+use App\Models\Partner;
 use Filament\Forms;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
@@ -13,23 +13,23 @@ use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
 
-class PhotoTypeResource extends Resource
+class PartnerResource extends Resource
 {
-    protected static ?string $model = PhotoType::class;
+    protected static ?string $model = Partner::class;
 
     protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
 
     public static function form(Form $form): Form
     {
         return $form
-            ->schema([
-                Forms\Components\TextInput::make('name')
-                    ->required()
-                    ->maxLength(255),
-                    Forms\Components\FileUpload::make('image')
-                    ->directory('phototypes-image')
-                    ->required()
-            ]);
+        ->schema([
+            Forms\Components\TextInput::make('name')
+                ->required()
+                ->maxLength(255),
+                Forms\Components\FileUpload::make('image')
+                ->directory('partners-logo')
+                ->required()
+        ]);
     }
 
     public static function table(Table $table): Table
@@ -71,9 +71,9 @@ class PhotoTypeResource extends Resource
     public static function getPages(): array
     {
         return [
-            'index' => Pages\ListPhotoTypes::route('/'),
-            'create' => Pages\CreatePhotoType::route('/create'),
-            'edit' => Pages\EditPhotoType::route('/{record}/edit'),
+            'index' => Pages\ListPartners::route('/'),
+            'create' => Pages\CreatePartner::route('/create'),
+            'edit' => Pages\EditPartner::route('/{record}/edit'),
         ];
     }
 }

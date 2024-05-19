@@ -1,4 +1,4 @@
-<nav x-data="{ open: false }" class="bg-gray-900" style="font-family: Komet;">
+<nav x-data="{ open: false }" class="bg-infocus-anthracitegrey infocus-shadow sticky top-0 z-50" style="font-family: Quicksand;">
     <!-- Primary Navigation Menu -->
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 ">
         <div class="flex justify-between h-16">
@@ -12,20 +12,24 @@
 
                 <!-- Navigation Links -->
                 <div class="hidden space-x-8 sm:-my-px sm:ms-10 sm:flex">
-                    <x-nav-link class="text-white" href="{{ route('pack.index') }}" :active="request()->routeIs('pack.index')">
+                    <x-nav-link class="text-infocus-icewhite" href="{{ route('pack.index') }}" :active="request()->routeIs('pack.index')">
                         {{ __('Our packs') }}
                     </x-nav-link>
-                    <x-nav-link class="text-white" href="{{ route('product.index') }}" :active="request()->routeIs('product.index')">
-                        {{ __('Our products') }}
+                    <x-nav-link class="text-infocus-icewhite" href="{{ route('product.index') }}" :active="request()->routeIs('product.index')">
+                        {{ __('Our material') }}
                     </x-nav-link>
-                    <x-nav-link class="text-white" href="{{ route('simulation.index') }}" :active="request()->routeIs('simulation.index')">
-                        {{ __('Simulation') }}
+                    <x-nav-link class="text-infocus-icewhite" href="{{ route('blog.index') }}" :active="request()->routeIs('blog.index')">
+                        {{ __('Blog') }}
+                    </x-nav-link>
+                    <x-nav-link class="text-infocus-icewhite" href="{{ route('faq.index') }}" :active="request()->routeIs('faq.index')">
+                        {{ __('FAQ') }}
                     </x-nav-link>
                 </div>
             </div>
             
             @auth
             <div class="hidden sm:flex sm:items-center sm:ms-6">
+                <a href="#" class="infocus-btn-primary text-infocus-twilightblue font-medium">{{ __('Find my ideal gear') }}</a>
 
                 <!-- Settings Dropdown -->
                 <div class="ms-3 relative">
@@ -40,7 +44,7 @@
                             @else
                             <span class="inline-flex rounded-md">
                                 <button type="button"
-                                    class="inline-flex items-center px-3 py-2 border border-transparent text-sm leading-4 font-medium rounded-md text-gray-500 bg-white hover:text-gray-700 focus:outline-none focus:bg-gray-50 active:bg-gray-50 transition ease-in-out duration-150">
+                                    class="inline-flex items-center px-3 py-2 border border-transparent text-sm leading-4 font-medium rounded-md text-gray-500 bg-infocus-icewhite hover:text-gray-700 focus:outline-none focus:bg-gray-50 active:bg-gray-50 transition ease-in-out duration-150">
                                     {{ Auth::user()->name }}
 
                                     <svg class="ms-2 -me-0.5 h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none"
@@ -81,13 +85,15 @@
                             </form>
                         </x-slot>
                     </x-dropdown>
+                    
                 </div>
             </div>
             @endauth
 
             @guest
             <div class="hidden sm:flex sm:items-center sm:ms-6">
-                <a href="{{ route('login') }}" class="text-sm text-white no-underline">{{ __('Login') }}</a>
+                <a href="#" class="infocus-btn-primary text-infocus-twilightblue font-medium mx-10">{{ __('Find my ideal gear') }}</a>
+                <a href="{{ route('login') }}" class="text-sm text-infocus-icewhite no-underline">{{ __('Login') }}</a>
             </div>
             @endguest
 
@@ -107,14 +113,24 @@
         </div>
     </div>
 
+
     <!-- Responsive Navigation Menu -->
     <div :class="{'block': open, 'hidden': ! open}" class="hidden sm:hidden">
         <div class="pt-2 pb-3 space-y-1">
-            <x-responsive-nav-link class="text-white" href="{{ route('pack.index') }}" :active="request()->routeIs('pack.index')">
+            <x-responsive-nav-link class="text-infocus-icewhite" href="{{ route('pack.index') }}" :active="request()->routeIs('pack.index')">
                 {{ __('Our packs') }}
             </x-responsive-nav-link>
-            <x-responsive-nav-link class="text-white" href="{{ route('product.index') }}" :active="request()->routeIs('product.index')">
+            <x-responsive-nav-link class="text-infocus-icewhite" href="{{ route('product.index') }}" :active="request()->routeIs('product.index')">
                 {{ __('Our products') }}
+            </x-responsive-nav-link>
+            <x-responsive-nav-link class="text-infocus-icewhite" href="{{ route('blog.index') }}" :active="request()->routeIs('product.index')">
+                {{ __('Blog') }}
+            </x-responsive-nav-link>
+            <x-responsive-nav-link class="text-infocus-icewhite" href="{{ route('faq.index') }}" :active="request()->routeIs('product.index')">
+                {{ __('FAQ') }}
+            </x-responsive-nav-link>
+            <x-responsive-nav-link class="text-infocus-icewhite" href="#">
+                {{ __('Find my ideal gear') }}
             </x-responsive-nav-link>
         </div>
 
@@ -124,14 +140,15 @@
             <div class="flex items-center px-4">
                 @if (Laravel\Jetstream\Jetstream::managesProfilePhotos())
                 <div class="shrink-0 me-3">
+                    
                     <img class="h-10 w-10 rounded-full object-cover" src="{{ Auth::user()->profile_photo_url }}"
                         alt="{{ Auth::user()->name }}" />
                 </div>
                 @endif
 
                 <div>
-                    <div class="font-medium text-base text-white">{{ Auth::user()->name }}</div>
-                    <div class="font-medium text-sm text-white">{{ Auth::user()->email }}</div>
+                    <div class="font-medium text-base text-infocus-icewhite">{{ Auth::user()->name }}</div>
+                    <div class="font-medium text-sm text-infocus-icewhite">{{ Auth::user()->email }}</div>
                 </div>
             </div>
 
@@ -140,7 +157,7 @@
                 <x-responsive-nav-link href="{{ route('profile.show') }}" :active="request()->routeIs('profile.show')">
                     {{ __('Profile') }}
                 </x-responsive-nav-link>
-
+                
                 @if (Laravel\Jetstream\Jetstream::hasApiFeatures())
                 <x-responsive-nav-link href="{{ route('api-tokens.index') }}"
                     :active="request()->routeIs('api-tokens.index')">
@@ -152,7 +169,7 @@
                 <form method="POST" action="{{ route('logout') }}" x-data>
                     @csrf
 
-                    <x-responsive-nav-link class="text-white" href="{{ route('logout') }}" @click.prevent="$root.submit();">
+                    <x-responsive-nav-link class="text-infocus-icewhite" href="{{ route('logout') }}" @click.prevent="$root.submit();">
                         {{ __('Log Out') }}
                     </x-responsive-nav-link>
                 </form>
@@ -164,9 +181,10 @@
         @guest
         <div class="pt-4 pb-1 border-t border-gray-200">
             <div class="mt-3 space-y-1 ">
-                <x-responsive-nav-link class="text-white" href="{{ route('login') }}">
+                <x-responsive-nav-link class="text-infocus-icewhite" href="{{ route('login') }}">
                     {{ __('Login') }}
                 </x-responsive-nav-link>
+                
             </div>
         </div>
         @endguest
