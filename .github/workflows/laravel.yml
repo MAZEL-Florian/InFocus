@@ -41,10 +41,14 @@ jobs:
       run: php artisan storage:link
     - name: Set Directory Permissions
       run: chmod -R 775 storage bootstrap/cache
-    - name: Create Database File
+    - name: Create Database
       run: |
         mkdir -p database
         touch database/database.sqlite
+    - name: Create Database
+      run: |
+        mkdir -p database
+        touch database/infocus.mysql
     - name: Run Migrations
       run: php artisan migrate --force
     - name: Seed Database
