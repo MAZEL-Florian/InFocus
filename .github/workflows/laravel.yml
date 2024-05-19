@@ -34,6 +34,7 @@ jobs:
    
     - name: Directory Permissions
       run: chmod -R 777 storage bootstrap/cache
+
       
     # - name: Run database migrations
     #   env:
