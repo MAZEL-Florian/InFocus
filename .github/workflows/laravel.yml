@@ -77,7 +77,6 @@ jobs:
           /package-lock.json
           /phpunit.xml
           /webpack.mix.js
-        dangerous-clean-slate: true
           
     - name: Install Composer dependencies on server
       run: ssh -o StrictHostKeyChecking=no ${{ secrets.FTP_USERNAME }}@${{ secrets.FTP_SERVER }} "composer install --no-progress --no-suggest --prefer-dist --optimize-autoloader"
