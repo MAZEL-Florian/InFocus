@@ -67,16 +67,16 @@ jobs:
         server-dir: /public_html/
         exclude: |
           .git*
-          /node_modules/
-          /vendor/
-          /storage/
-          /tests/
-          /.env
-          /.github/
-          /composer.lock
-          /package-lock.json
-          /phpunit.xml
-          /webpack.mix.js
+          node_modules/**
+          vendor/**
+          storage/**
+          tests/**
+          .env
+          .github/**
+          composer.lock
+          package-lock.json
+          phpunit.xml
+          webpack.mix.js
           
     - name: Install Composer dependencies on server
       run: ssh -o StrictHostKeyChecking=no ${{ secrets.FTP_USERNAME }}@${{ secrets.FTP_SERVER }} "composer install --no-progress --no-suggest --prefer-dist --optimize-autoloader"
