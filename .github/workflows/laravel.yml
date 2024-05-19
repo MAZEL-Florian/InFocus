@@ -30,14 +30,30 @@ jobs:
       run: php artisan key:generate
     - name: Storage link
       run: php artisan storage:link
+   
     - name: Directory Permissions
       run: chmod -R 777 storage bootstrap/cache
+      
     - name: Create Database
       run: |
         mkdir -p database
         touch database/database.sqlite
+    - name: php migration
+      run: php artisan migrate
+    - name: php seed
+      run: php artisan db:seed
+        
     - name: Execute tests (Unit and Feature tests) via PHPUnit/Pest
       env:
         DB_CONNECTION: sqlite
         DB_DATABASE: database/database.sqlite
       run: php artisan test
+
+    - name: Deploy to Hostinger via FTP
+      uses: SamKirkland/FTP-Deploy-Action@4.1.0
+      with:
+        server: 154.56.33.130
+        username: ${{ secrets.FTP_USERNAME }}
+        password: ${{ secrets.FTP_PASSWORD }}
+        local-dir: ./public/
+        server-dir: /public_html/
