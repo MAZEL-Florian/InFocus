@@ -18,6 +18,15 @@ jobs:
       with:
         php-version: '8.1.5'
         extensions: mbstring, xml, bcmath
+    - uses: actions/checkout@v2
+    - uses: actions/setup-node@v3
+      with: 
+        node-version: 18.14.2
+    - uses: mirromutth/mysql-action@v1.1
+      with:
+        mysql database: infocus
+        mysql user: infocus_admin
+        mysql password: m7a18jQybrjjHhS
     - name: Copy .env
       run: php -r "file_exists('.env') || copy('.env.example', '.env');"
     - name: Install Composer Dependencies
