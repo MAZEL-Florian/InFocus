@@ -45,6 +45,7 @@ jobs:
     - name: Create .env file
       run: |
         cp .env.example .env
+        echo "APP_KEY=base64:$(php -r 'echo base64_encode(random_bytes(32));')" >> .env
         echo "DB_CONNECTION=mysql" >> .env
         echo "DB_HOST=127.0.0.1" >> .env
         echo "DB_PORT=3306" >> .env
@@ -52,9 +53,9 @@ jobs:
         echo "DB_USERNAME=root" >> .env
         echo "DB_PASSWORD=root" >> .env
         php artisan config:cache
-        
+
     - name: Generate application key
-      run: php artisan key:generate --env=testing
+      run: php artisan key:generate --force
 
     - name: Configure MySQL
       run: |
