@@ -20,7 +20,7 @@ jobs:
       - uses: actions/checkout@v2
       - uses: actions/setup-node@v3
         with: 
-          node-version: 16
+          node-version: 18
       - uses: mirromutth/mysql-action@v1.1
         with:
           mysql database: laravel-test-db
@@ -44,9 +44,9 @@ jobs:
         env:
           APP_ENV: testing
           DB_CONNECTION: mysql
-          DB_USERNAME: laravel_test_user
-          DB_PASSWORD: super_secret
-          DB_DATABASE: laravel_test_db
+          DB_USERNAME: ${{ secrets.DB_TEST_USERNAME }}
+          DB_PASSWORD: ${{ secrets.DB_TEST_PASSWORD }}
+          DB_DATABASE: ${{ secrets.DB_TEST_DATABASE }}
         run: php artisan test
       - name: Deploy to Server
         if: ${{ success() }}
