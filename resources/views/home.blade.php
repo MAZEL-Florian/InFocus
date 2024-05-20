@@ -319,7 +319,7 @@
                     <div class="py-5 pt-0">
                         <span
                             class="select-none text-center uppercase transition-all py-3 px-6 rounded-lg bg-infocus-icewhite text-infocus-bluenight font-medium">
-                            10/05/2024
+                            11/05/2024
                         </span>
                     </div>
                     <a href="#">
