@@ -41,7 +41,7 @@ jobs:
 
     - name: Install dependencies
       run: composer install --prefer-dist --no-progress --no-suggest --optimize-autoloader
-      
+
     - name: Create .env file
       run: |
         cp .env.example .env
@@ -52,6 +52,7 @@ jobs:
         echo "DB_DATABASE=test_db" >> .env
         echo "DB_USERNAME=root" >> .env
         echo "DB_PASSWORD=root" >> .env
+        echo "SESSION_DRIVER=file" >> .env
         php artisan config:cache
 
     - name: Generate application key
@@ -61,6 +62,14 @@ jobs:
       run: |
         sudo sed -i '/\[mysqld\]/a default-authentication-plugin=mysql_native_password' /etc/mysql/my.cnf
         sudo service mysql restart
+
+    - name: Setup storage and cache
+      run: |
+        php artisan storage:link
+        php artisan cache:clear
+        php artisan config:cache
+        php artisan route:cache
+        php artisan view:cache
 
     - name: Migrate and seed database
       env:
