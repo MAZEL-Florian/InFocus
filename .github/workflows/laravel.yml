@@ -139,6 +139,7 @@ jobs:
         host: ${{ secrets.SSH_HOST }}
         username: ${{ secrets.SSH_USERNAME }}
         password: ${{ secrets.SSH_KEY }}
+        port: 21
         script: |
           cd /public_html/
           php artisan migrate
