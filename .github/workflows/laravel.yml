@@ -54,7 +54,7 @@ jobs:
         php artisan config:cache
         
     - name: Generate application key
-      run: php artisan key:generate
+      run: php artisan key:generate --env=testing
 
     - name: Configure MySQL
       run: |
