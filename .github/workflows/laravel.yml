@@ -133,7 +133,11 @@ jobs:
         local-dir: ./ # Modify this if your build directory is different
         server-dir: /public_html/ # Replace with your server directory
 
+    - name: Test SSH connection
+      run: ssh -o StrictHostKeyChecking=no -i ${{ secrets.SSH_KEY }} ${{ secrets.SSH_USERNAME }}@${{ secrets.SSH_HOST }} "echo 'SSH connection successful'"
+
     - name: Run deployment commands on Hostinger via SSH
+      if: success()
       uses: appleboy/ssh-action@master
       with:
         host: ${{ secrets.SSH_HOST }}
