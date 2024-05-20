@@ -19,11 +19,6 @@ jobs:
       - uses: actions/setup-node@v3
         with: 
           node-version: 18
-      - uses: mirromutth/mysql-action@v1.1
-        with:
-          mysql database: ${{ secrets.DB_TEST_DATABASE }}
-          mysql user: ${{ secrets.DB_TEST_USERNAME }}
-          mysql password: ${{ secrets.DB_TEST_PASSWORD }}
       - name: Copy .env
         run: cp .env.example .env
       - name: Install composer Dependencies
