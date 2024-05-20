@@ -138,7 +138,7 @@ jobs:
       with:
         host: ${{ secrets.SSH_HOST }}
         username: ${{ secrets.SSH_USERNAME }}
-        key: ${{ secrets.SSH_KEY }}
+        password: ${{ secrets.SSH_PASSWORD }}
         script: |
           cd /public_html/
           composer install --no-progress --no-suggest --prefer-dist --optimize-autoloader
