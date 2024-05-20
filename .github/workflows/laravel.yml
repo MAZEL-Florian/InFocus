@@ -41,7 +41,11 @@ jobs:
 
     - name: Install dependencies
       run: composer install --prefer-dist --no-progress --no-suggest --optimize-autoloader
-
+    
+    - name: install npm
+      run: npm install
+    - name: build npm
+      run: npm run build
     - name: Create .env file
       run: |
         cp .env.example .env
