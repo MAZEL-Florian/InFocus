@@ -41,13 +41,11 @@ jobs:
 
     - name: Install dependencies
       run: composer install --prefer-dist --no-progress --no-suggest --optimize-autoloader
-
-    - name: Install npm dependencies
+    
+    - name: install npm
       run: npm install
-
-    - name: Build assets
+    - name: build npm
       run: npm run build
-
     - name: Create .env file
       run: |
         cp .env.example .env
@@ -98,11 +96,6 @@ jobs:
         DB_USERNAME: root
         DB_PASSWORD: root
       run: php artisan test
-
-    - name: Display Laravel logs on failure
-      if: failure()
-      run: cat storage/logs/laravel.log
-
 
 
 
