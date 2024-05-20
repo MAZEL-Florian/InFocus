@@ -15,14 +15,30 @@ jobs:
         uses: shivammathur/setup-php@15c43e89cdef867065b0213be354c2841860869e
         with:
           php-version: '8.1.5'
-
-      - name: Install Composer dependencies
-        run: composer install --prefer-dist --no-ansi --no-interaction --no-scripts --no-progress --optimize-autoloader
-
-      - name: Install NPM dependencies
-        run: npm install
-
-      - name: Run tests
+      - uses: actions/checkout@v2
+      - uses: actions/setup-node@v3
+        with: 
+          node-version: 18
+      - uses: mirromutth/mysql-action@v1.1
+        with:
+          mysql database: ${{ secrets.DB_TEST_DATABASE }}
+          mysql user: ${{ secrets.DB_TEST_USERNAME }}
+          mysql password: ${{ secrets.DB_TEST_PASSWORD }}
+      - name: Copy .env
+        run: cp .env.example .env
+      - name: Install composer Dependencies
+        run: composer install -q --no-ansi --no-interaction --no-scripts --no-progress --prefer-dist
+      - name: Install node dependencies
+        run: npm ci
+      - name: Setup Project
+        run: |
+          php artisan config:clear
+          php artisan cache:clear
+          php artisan key:generate
+          npm run build
+      - name: Directory Permissions
+        run: chmod 755 -R storage bootstrap/cache
+      - name: Run Unit tests
         env:
           APP_ENV: testing
           DB_CONNECTION: mysql
