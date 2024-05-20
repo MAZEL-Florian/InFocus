@@ -91,7 +91,7 @@ jobs:
         DB_DATABASE: test_db
         DB_USERNAME: root
         DB_PASSWORD: root
-      run: vendor/bin/phpunit
+      run: php artisan test
 
 
 
