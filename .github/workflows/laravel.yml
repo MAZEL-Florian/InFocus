@@ -7,7 +7,21 @@ on:
 jobs:
   laravel-tests:
     runs-on: ubuntu-latest
-
+    services:
+      mysql:
+        image: mysql:8.1
+        env:
+          # The MySQL docker container requires these environment variables to be set
+          # so we can create and migrate the test database.
+          # See: https://hub.docker.com/_/mysql
+          MYSQL_DATABASE: testdb
+          MYSQL_ROOT_PASSWORD: testrootpass
+        ports:
+          # Opens port 3306 on service container and host
+          # https://docs.github.com/en/actions/using-containerized-services/about-service-containers
+          - 3306:3306
+          # Before continuing, verify the mysql container is reachable from the ubuntu host
+        options: --health-cmd="mysqladmin ping" --health-interval=10s --health-timeout=5s --health-retries=3
     steps:
     
       - name: Checkout code
@@ -21,11 +35,6 @@ jobs:
       - uses: actions/setup-node@v3
         with: 
           node-version: 18
-      - uses: mirromutth/mysql-action@v1.1
-        with:
-         mysql database: laravel-test-db
-         mysql user: laravel_test_user
-         mysql password: example
       - name: Copy .env
         run: cp .env.example .env
       - name: Install composer Dependencies
@@ -44,9 +53,10 @@ jobs:
         env:
           APP_ENV: testing
           DB_CONNECTION: mysql
-          DB_USERNAME: laravel_test_user
-          DB_PASSWORD: super_secret
-          DB_DATABASE: laravel_test_db
+          DATABASE_NAME: testdb
+          DATABASE_USERNAME: root          
+          DATABASE_PASSWORD: testrootpass 
+          DATABASE_ENDPOINT: 127.0.0.1
         run: php artisan test
       - name: Deploy to Server
         if: ${{ success() }}
