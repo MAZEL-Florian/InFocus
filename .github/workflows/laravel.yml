@@ -106,7 +106,47 @@ jobs:
       run: |
         if [ -f storage/logs/laravel.log ]; then cat storage/logs/laravel.log; else echo "No log file found"; fi
 
+  deploy:
+    needs: laravel-tests
+    runs-on: ubuntu-latest
 
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v2
+    - name: Copy .env
+      run: php -r "file_exists('.env') || copy('.env.example', '.env');"
+    - name: Install dependencies
+      run: composer install --prefer-dist --no-progress --no-suggest --optimize-autoloader --no-dev
+
+    - name: Install npm dependencies
+      run: npm install --production
+
+    - name: Build assets
+      run: npm run build
+
+    - name: Sync files to Hostinger via FTP
+      uses: SamKirkland/FTP-Deploy-Action@4.1.0
+      with:
+        server: ${{ secrets.FTP_SERVER }}
+        username: ${{ secrets.FTP_USERNAME }}
+        password: ${{ secrets.FTP_PASSWORD }}
+        local-dir: ./ # Modify this if your build directory is different
+        server-dir: /public_html/ # Replace with your server directory
+
+    - name: Run deployment commands on Hostinger via SSH
+      uses: appleboy/ssh-action@master
+      with:
+        host: ${{ secrets.FTP_SERVER }}
+        username: ${{ secrets.SSH_USERNAME }}
+        password: ${{ secrets.SSH_KEY }}
+        script: |
+          cd /public_html/
+          php artisan migrate
+          php artisan config:cache
+          php artisan route:cache
+          php artisan view:cache
+          php artisan key:generate
+          php artisan storage:link
 
 
 # name: InFocus
