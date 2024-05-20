@@ -71,6 +71,8 @@ jobs:
 
     - name: Setup storage and cache
       run: |
+        mkdir -p storage/logs
+        touch storage/logs/laravel.log
         php artisan storage:link
         php artisan cache:clear
         php artisan config:cache
@@ -101,7 +103,9 @@ jobs:
 
     - name: Display Laravel logs on failure
       if: failure()
-      run: cat storage/logs/laravel.log
+      run: |
+        if [ -f storage/logs/laravel.log ]; then cat storage/logs/laravel.log; else echo "No log file found"; fi
+
 
 
 
