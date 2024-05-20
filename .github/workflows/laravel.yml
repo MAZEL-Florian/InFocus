@@ -45,12 +45,16 @@ jobs:
     - name: Create .env file
       run: |
         cp .env.example .env
+        echo "DB_CONNECTION=mysql" >> .env
+        echo "DB_HOST=127.0.0.1" >> .env
+        echo "DB_PORT=3306" >> .env
+        echo "DB_DATABASE=test_db" >> .env
+        echo "DB_USERNAME=root" >> .env
+        echo "DB_PASSWORD=root" >> .env
         php artisan config:cache
         
     - name: Generate application key
       run: php artisan key:generate
-
-    
 
     - name: Configure MySQL
       run: |
@@ -78,6 +82,7 @@ jobs:
         DB_USERNAME: root
         DB_PASSWORD: root
       run: vendor/bin/phpunit
+
 
 
 # name: InFocus
