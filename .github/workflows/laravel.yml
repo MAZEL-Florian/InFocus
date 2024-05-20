@@ -75,9 +75,9 @@ jobs:
         touch storage/logs/laravel.log
         php artisan storage:link
         php artisan cache:clear
-        php artisan config:cache
-        php artisan route:cache
-        php artisan view:cache
+        php artisan config:clear
+        php artisan route:clear
+        php artisan view:clear
 
     - name: Migrate and seed database
       env:
