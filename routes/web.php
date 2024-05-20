@@ -34,3 +34,7 @@ Route::get('/faq', [FaqController::class, 'index'])->name('faq.index');
 Route::middleware(['auth:sanctum', config('jetstream.auth_session'),'verified', ])->group(function () {
     Route::get('/simulation', [SimulationController::class, 'index'])->name('simulation.index');
 });
+
+Route::middleware(['admin'])->prefix('admin')->group(function () {
+
+});
