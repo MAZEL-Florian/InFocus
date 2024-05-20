@@ -143,16 +143,19 @@ jobs:
         password: ${{ secrets.SSH_PASSWORD }}
         port: ${{ secrets.SSH_PORT }}
         script: |
-          cd /public_html/
-          composer install --no-progress --no-suggest --prefer-dist --optimize-autoloader
-          npm install
-          npm run build
-          php artisan migrate
-          php artisan config:cache
-          php artisan route:cache
-          php artisan view:cache
-          php artisan key:generate
-          php artisan storage:link
+          ls -al
+
+      
+      # cd /public_html/
+      # composer install --no-progress --no-suggest --prefer-dist --optimize-autoloader
+      # npm install
+      # npm run build
+      # php artisan migrate
+      # php artisan config:cache
+      # php artisan route:cache
+      # php artisan view:cache
+      # php artisan key:generate
+      # php artisan storage:link
 
     # - name: Install Composer dependencies on server
     #   run: ssh -o StrictHostKeyChecking=no ${{ secrets.FTP_USERNAME }}@${{ secrets.FTP_SERVER }} "composer install --no-progress --no-suggest --prefer-dist --optimize-autoloader"
