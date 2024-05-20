@@ -1,79 +1,161 @@
-name: InFocus
+name: CI/CD Pipeline
 
 on:
   push:
-    branches: [ "main" ]
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
 
 jobs:
   laravel-tests:
     runs-on: ubuntu-latest
+
     services:
       mysql:
-        image: mysql:8.1
+        image: mysql:5.7
         env:
-          # The MySQL docker container requires these environment variables to be set
-          # so we can create and migrate the test database.
-          # See: https://hub.docker.com/_/mysql
-          MYSQL_DATABASE: testdb
-          MYSQL_ROOT_PASSWORD: testrootpass
+          MYSQL_ROOT_PASSWORD: root
+          MYSQL_DATABASE: test_db
         ports:
-          # Opens port 3306 on service container and host
-          # https://docs.github.com/en/actions/using-containerized-services/about-service-containers
           - 3306:3306
-          # Before continuing, verify the mysql container is reachable from the ubuntu host
-        options: --health-cmd="mysqladmin ping" --health-interval=10s --health-timeout=5s --health-retries=3
-    steps:
-    
-      - name: Checkout code
-        uses: actions/checkout@v2
+        options: >-
+          --health-cmd="mysqladmin ping --silent"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=3
 
-      - name: Set up PHP
-        uses: shivammathur/setup-php@15c43e89cdef867065b0213be354c2841860869e
-        with:
-          php-version: '8.1.5'
-      - uses: actions/checkout@v2
-      - uses: actions/setup-node@v3
-        with: 
-          node-version: 18
-      - name: Copy .env
-        run: cp .env.example .env
-      - name: Install composer Dependencies
-        run: composer install -q --no-ansi --no-interaction --no-scripts --no-progress --prefer-dist
-      - name: Install node dependencies
-        run: npm ci
-      - name: Setup Project
-        run: |
-          php artisan config:clear
-          php artisan cache:clear
-          php artisan key:generate
-          npm run build
-      - name: Directory Permissions
-        run: chmod 755 -R storage bootstrap/cache
-      - name: Run Unit tests
-        env:
-          APP_ENV: testing
-          DB_CONNECTION: mysql
-          DATABASE_NAME: testdb
-          DATABASE_USERNAME: root          
-          DATABASE_PASSWORD: testrootpass 
-          DATABASE_ENDPOINT: 127.0.0.1
-        run: php artisan test
-      - name: Deploy to Server
-        if: ${{ success() }}
-        uses: appleboy/ssh-action@master
-        with:
-          host: ${{ secrets.SSH_HOST }}
-          username: ${{ secrets.SSH_USERNAME }}
-          key: ${{ secrets.SSH_KEY }}
-          script_stop: true
-          script: |
-            cd apps
-            cd laravel-example
-            git pull
-            npm ci
-            npm run prod
-            composer i
-            php artisan migrate --force
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v2
+
+    - name: Set up PHP
+      uses: shivammathur/setup-php@v2
+      with:
+        php-version: 8.1.5
+        extensions: mbstring, pdo, pdo_mysql, intl, bcmath
+        ini-values: |
+          memory_limit = 512M
+        coverage: none
+
+    - name: Install dependencies
+      run: composer install --prefer-dist --no-progress --no-suggest --optimize-autoloader
+
+    - name: Generate application key
+      run: php artisan key:generate
+
+    - name: Create .env file
+      run: |
+        cp .env.example .env
+        php artisan config:cache
+
+    - name: Configure MySQL
+      run: |
+        sudo sed -i '/\[mysqld\]/a default-authentication-plugin=mysql_native_password' /etc/mysql/my.cnf
+        sudo service mysql restart
+
+    - name: Migrate and seed database
+      env:
+        DB_CONNECTION: mysql
+        DB_HOST: 127.0.0.1
+        DB_PORT: 3306
+        DB_DATABASE: test_db
+        DB_USERNAME: root
+        DB_PASSWORD: root
+      run: |
+        php artisan migrate --force
+        php artisan db:seed --force
+
+    - name: Run tests
+      env:
+        DB_CONNECTION: mysql
+        DB_HOST: 127.0.0.1
+        DB_PORT: 3306
+        DB_DATABASE: test_db
+        DB_USERNAME: root
+        DB_PASSWORD: root
+      run: vendor/bin/phpunit
+
+
+# name: InFocus
+
+# on:
+#   push:
+#     branches: [ "main" ]
+
+# jobs:
+#   laravel-tests:
+#     runs-on: ubuntu-latest
+#     services:
+#       mysql:
+#         image: mysql:8.1
+#         env:
+#           # The MySQL docker container requires these environment variables to be set
+#           # so we can create and migrate the test database.
+#           # See: https://hub.docker.com/_/mysql
+#           MYSQL_DATABASE: testdb
+#           MYSQL_ROOT_PASSWORD: testrootpass
+#         ports:
+#           # Opens port 3306 on service container and host
+#           # https://docs.github.com/en/actions/using-containerized-services/about-service-containers
+#           - 3306:3306
+#           # Before continuing, verify the mysql container is reachable from the ubuntu host
+#         options: --health-cmd="mysqladmin ping" --health-interval=10s --health-timeout=5s --health-retries=3
+#     steps:
+    
+#       - name: Checkout code
+#         uses: actions/checkout@v2
+
+#       - name: Set up PHP
+#         uses: shivammathur/setup-php@15c43e89cdef867065b0213be354c2841860869e
+#         with:
+#           php-version: '8.1.5'
+#       - uses: actions/checkout@v2
+#       - uses: actions/setup-node@v3
+#         with: 
+#           node-version: 18
+#       - name: Copy .env
+#         run: cp .env.example .env
+#       - name: Install composer Dependencies
+#         run: composer install -q --no-ansi --no-interaction --no-scripts --no-progress --prefer-dist
+#       - name: Install node dependencies
+#         run: npm ci
+#       - name: Setup Project
+#         run: |
+#           php artisan config:clear
+#           php artisan cache:clear
+#           php artisan key:generate
+#           npm run build
+#       - name: Directory Permissions
+#         run: chmod 755 -R storage bootstrap/cache
+#       - name: Run Unit tests
+#         env:
+#           APP_ENV: testing
+#           DB_CONNECTION: mysql
+#           DATABASE_NAME: testdb
+#           DATABASE_USERNAME: root          
+#           DATABASE_PASSWORD: testrootpass 
+#           DATABASE_ENDPOINT: 127.0.0.1
+#         run: php artisan test
+#       - name: Deploy to Server
+#         if: ${{ success() }}
+#         uses: appleboy/ssh-action@master
+#         with:
+#           host: ${{ secrets.SSH_HOST }}
+#           username: ${{ secrets.SSH_USERNAME }}
+#           key: ${{ secrets.SSH_KEY }}
+#           script_stop: true
+#           script: |
+#             cd apps
+#             cd laravel-example
+#             git pull
+#             npm ci
+#             npm run prod
+#             composer i
+#             php artisan migrate --force
+
+
     # - name: Update composer
     #   run: composer update
     # - name: Install Dependencies
