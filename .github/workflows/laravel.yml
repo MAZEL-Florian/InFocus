@@ -38,8 +38,11 @@ jobs:
           memory_limit = 512M
         coverage: none
 
+    - name: Update composer
+      run: composer update
+      
     - name: Install dependencies
-      run: composer install --prefer-dist --no-progress --no-suggest --optimize-autoloader
+      run: composer install --prefer-dist --no-progress --optimize-autoloader
 
     - name: Install npm dependencies
       run: npm install
