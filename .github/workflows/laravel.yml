@@ -99,50 +99,58 @@ jobs:
         DB_USERNAME: root
         DB_PASSWORD: root
       run: php artisan test
+      
+    - name: Run PHP_CodeSniffer
+      run: ./vendor/bin/phpcs --standard=PSR12 app/ tests/
 
+    - name: Run PHPStan
+      run: ./vendor/bin/phpstan analyse --level=7 app/
+      
     - name: Display Laravel logs on failure
       if: failure()
       run: |
         if [ -f storage/logs/laravel.log ]; then cat storage/logs/laravel.log; else echo "No log file found"; fi
 
-  deploy:
-    needs: laravel-tests
-    runs-on: ubuntu-latest
-
-    steps:
-    - name: Checkout repository
-      uses: actions/checkout@v2
-    - name: Copy .env
-      run: php -r "file_exists('.env') || copy('.env.example', '.env');"
-
-    - name: Sync files to Hostinger via FTP
-      uses: SamKirkland/FTP-Deploy-Action@4.1.0
-      with:
-        server: ${{ secrets.FTP_SERVER }}
-        username: ${{ secrets.FTP_USERNAME }}
-        password: ${{ secrets.FTP_PASSWORD }}
-        local-dir: ./ 
-        server-dir: /public_html/
 
 
-    - name: Run deployment commands on Hostinger via SSH
-      if: success()
-      uses: appleboy/ssh-action@master
-      with:
-        host: ${{ secrets.SSH_HOST }}
-        username: ${{ secrets.SSH_USERNAME }}
-        password: ${{ secrets.SSH_PASSWORD }}
-        port: ${{ secrets.SSH_PORT }}
-        script: |
-          cd domains/in-focus.fr/public_html
-          composer2 install --no-progress --no-suggest --prefer-dist --optimize-autoloader
-          export NVM_DIR=~/.nvm
-          source ~/.nvm/nvm.sh
-          npm install
-          npm run build
-          php artisan migrate
-          php artisan config:clear
-          php artisan route:clear
-          php artisan view:clear
-          php artisan key:generate
-          php artisan storage:link
+  # deploy:
+  #   needs: laravel-tests
+  #   runs-on: ubuntu-latest
+
+  #   steps:
+  #   - name: Checkout repository
+  #     uses: actions/checkout@v2
+  #   - name: Copy .env
+  #     run: php -r "file_exists('.env') || copy('.env.example', '.env');"
+
+  #   - name: Sync files to Hostinger via FTP
+  #     uses: SamKirkland/FTP-Deploy-Action@4.1.0
+  #     with:
+  #       server: ${{ secrets.FTP_SERVER }}
+  #       username: ${{ secrets.FTP_USERNAME }}
+  #       password: ${{ secrets.FTP_PASSWORD }}
+  #       local-dir: ./ 
+  #       server-dir: /public_html/
+
+
+  #   - name: Run deployment commands on Hostinger via SSH
+  #     if: success()
+  #     uses: appleboy/ssh-action@master
+  #     with:
+  #       host: ${{ secrets.SSH_HOST }}
+  #       username: ${{ secrets.SSH_USERNAME }}
+  #       password: ${{ secrets.SSH_PASSWORD }}
+  #       port: ${{ secrets.SSH_PORT }}
+  #       script: |
+  #         cd domains/in-focus.fr/public_html
+  #         composer2 install --no-progress --no-suggest --prefer-dist --optimize-autoloader
+  #         export NVM_DIR=~/.nvm
+  #         source ~/.nvm/nvm.sh
+  #         npm install
+  #         npm run build
+  #         php artisan migrate
+  #         php artisan config:clear
+  #         php artisan route:clear
+  #         php artisan view:clear
+  #         php artisan key:generate
+  #         php artisan storage:link
