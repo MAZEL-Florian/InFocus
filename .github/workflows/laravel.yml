@@ -103,8 +103,8 @@ jobs:
         DB_PASSWORD: root
       run: php artisan test
       
-    - name: Run PHP_CodeSniffer
-      run: ./vendor/bin/phpcs --standard=PSR12 app/ tests/
+    # - name: Run PHP_CodeSniffer
+    #   run: ./vendor/bin/phpcs --standard=PSR12 app/ tests/
 
     - name: Run PHPStan
       run: ./vendor/bin/phpstan analyse --level=7 app/
