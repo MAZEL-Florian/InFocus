@@ -107,7 +107,7 @@
 
 
 
-        {{-- STYLE PHOTO --}}
+        {{-- STYLE PHOTO  --}}
         @if($photoTypes->isNotEmpty())
 
         <h3 class="py-24 text-7xl text-infocus-icewhite font-ruthie">{{ __('Find your photo style') }}
@@ -115,7 +115,7 @@
         <div class="relative w-full glide-photostyle">
             <!-- Slides -->
             <div class="overflow-hidden" data-glide-el="track">
-                
+
                 <ul class="relative w-full overflow-hidden p-0 whitespace-no-wrap flex flex-no-wrap [backface-visibility: hidden] [transform-style: preserve-3d] [touch-action: pan-Y] [will-change: transform]">
                     @foreach($photoTypes as $photoType)
                     <li class="relative w-48 flex flex-shrink-0">
