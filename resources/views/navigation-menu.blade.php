@@ -1,6 +1,6 @@
-<nav x-data="{ open: false }" class="bg-infocus-anthracitegrey infocus-shadow sticky top-0 z-50" style="font-family: Quicksand;">
+<nav x-data="{ open: false }" class="bg-infocus-anthracitegrey infocus-shadow-navigation sticky top-0 z-50" style="font-family: Quicksand;">
     <!-- Primary Navigation Menu -->
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 ">
+    <div class="max-w-screen-2xl mx-auto px-4 sm:px-6 lg:px-8 ">
         <div class="flex justify-between h-16">
             <div class="flex">
                 <!-- Logo -->
@@ -29,7 +29,7 @@
             
             @auth
             <div class="hidden sm:flex sm:items-center sm:ms-6">
-                <a href="#" class="infocus-btn-primary text-infocus-twilightblue font-medium">{{ __('Find my ideal gear') }}</a>
+                <a href="{{ route('simulation.index') }}" class="infocus-btn-primary text-infocus-twilightblue font-medium">{{ __('Find my ideal gear') }}</a>
 
                 <!-- Settings Dropdown -->
                 <div class="ms-3 relative">
@@ -92,7 +92,7 @@
 
             @guest
             <div class="hidden sm:flex sm:items-center sm:ms-6">
-                <a href="#" class="infocus-btn-primary text-infocus-twilightblue font-medium mx-10">{{ __('Find my ideal gear') }}</a>
+                <a href="{{ route('simulation.index') }}" class="infocus-btn-primary text-infocus-twilightblue font-medium mx-10">{{ __('Find my ideal gear') }}</a>
                 <a href="{{ route('login') }}" class="text-sm text-infocus-icewhite no-underline">{{ __('Login') }}</a>
             </div>
             @endguest
@@ -123,13 +123,13 @@
             <x-responsive-nav-link class="text-infocus-icewhite" href="{{ route('product.index') }}" :active="request()->routeIs('product.index')">
                 {{ __('Our products') }}
             </x-responsive-nav-link>
-            <x-responsive-nav-link class="text-infocus-icewhite" href="{{ route('blog.index') }}" :active="request()->routeIs('product.index')">
+            <x-responsive-nav-link class="text-infocus-icewhite" href="{{ route('blog.index') }}" :active="request()->routeIs('blog.index')">
                 {{ __('Blog') }}
             </x-responsive-nav-link>
-            <x-responsive-nav-link class="text-infocus-icewhite" href="{{ route('faq.index') }}" :active="request()->routeIs('product.index')">
+            <x-responsive-nav-link class="text-infocus-icewhite" href="{{ route('faq.index') }}" :active="request()->routeIs('faq.index')">
                 {{ __('FAQ') }}
             </x-responsive-nav-link>
-            <x-responsive-nav-link class="text-infocus-icewhite" href="#">
+            <x-responsive-nav-link class="text-infocus-icewhite" href="{{ route('simulation.index') }}" :active="request()->routeIs('simulation.index')">
                 {{ __('Find my ideal gear') }}
             </x-responsive-nav-link>
         </div>

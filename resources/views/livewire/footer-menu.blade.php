@@ -3,10 +3,14 @@
     <div class="container mx-auto">
         <section class="p-1 border-b border-infocus-icewhite border-opacity-10">
             <!-- Left -->
-            <div class="block lg:block">
-                <a href="#"><img src="{{asset('img/Logo blanc couleur.png')}}" class="w-24"></a>
+            <div class="flex items-start">
+                <a href="{{ route('home.index') }}"><img src="{{ asset('img/Logo blanc couleur.png') }}" class="w-24"></a>
             </div>
+            
+            
         </section>
+        
+        
         <!-- Section: Links  -->
         <section class="border-b border-infocus-icewhite border-opacity-10">
             <div class="text-center md:text-left mt-5">

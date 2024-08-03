@@ -1,44 +1,60 @@
 <x-guest-layout>
-    @livewire('navigation-menu')
-    <x-slot name="header">
-        <h2 class="font-semibold text-xl text-gray-800 leading-tight">
-            {{ __('Our packs') }}
-        </h2>
-    </x-slot>
 
-    <div class="py-12">
-        <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
-            <div class="bg-white overflow-hidden shadow-xl sm:rounded-lg">
-                
-                <section class="bg-white dark:bg-gray-900">
-                    <div class="py-8 px-4 mx-auto max-w-screen-xl sm:py-16 lg:px-6">
-                        <h2 class="mb-8 text-4xl tracking-tight font-extrabold text-gray-900 dark:text-white">{{ __('Frequently asked questions') }}</h2>
-                        <div class="grid pt-8 text-left border-t border-gray-200 md:gap-16 dark:border-gray-700 md:grid-cols-2">
-                            <div>
-                                @foreach($faqs as $faq)
-                                <div class="mb-10">
-                                    <h3 class="flex items-center mb-4 text-lg font-medium text-gray-900 dark:text-white">
-                                        <svg class="flex-shrink-0 mr-2 w-5 h-5 text-gray-500 dark:text-gray-400" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-8-3a1 1 0 00-.867.5 1 1 0 11-1.731-1A3 3 0 0113 8a3.001 3.001 0 01-2 2.83V11a1 1 0 11-2 0v-1a1 1 0 011-1 1 1 0 100-2zm0 8a1 1 0 100-2 1 1 0 000 2z" clip-rule="evenodd"></path></svg>
-                                        {{ $faq->question }}
-                                    </h3>
-                                    <p class="text-gray-500 dark:text-gray-400">{{ $faq->answer }}</p>
-                                </div>
-                                @endforeach
-                               
+    <div class="py-10">
+       
+        
+        <div class="max-w-7xl mx-auto sm:px-6">
+
+            <div class="mx-auto max-w-screen-xl max-sm:py-16">
+                <h1 class="mb-8 text-4xl font-semibold text-infocus-icewhite dark:text-white">FAQ</h1>
+                <h2 class="mb-8 text-4xl font-semibold text-infocus-icewhite dark:text-white">Des questions ?
+                    Nous sommes là pour t'aider !</h2>
+
+                <div class="flex flex-col md:flex-row gap-6">
+                    @foreach([0, 1] as $column)
+                    <div class="flex-1 flex flex-col gap-6">
+                        @foreach($faqs as $index => $faq)
+                        @if($index % 2 == $column)
+                        <div class="bg-infocus-icewhite infocus-shadow-box rounded-lg shadow-md p-4">
+                            <div class="flex justify-between items-center cursor-pointer"
+                                onclick="toggleParagraph('{{ $column }}-{{ $index }}')">
+                                <h2 class="text-lg font-semibold">{{ $faq->question }}</h2>
+                                <span id="arrow-{{ $column }}-{{ $index }}" class="transition-transform rotate-0">
+                                    <svg class="w-4 h-4 text-gray-500 transition-all duration-300 transform rotate-0 peer-checked:rotate-180"
+                                        xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
+                                        stroke="currentColor" stroke-width="2">
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7" />
+                                    </svg>
+                                </span>
+                            </div>
+                            <div id="para-{{ $column }}-{{ $index }}"
+                                class="mt-2 overflow-hidden transition-all duration-300 max-h-0 opacity-0">
+                                <p class="p-2">{{ $faq->answer }}</p>
                             </div>
                         </div>
+                        @endif
+                        @endforeach
                     </div>
-                  </section>
-
-
-               
-
-
-
-                
-
+                    @endforeach
+                </div>
             </div>
         </div>
     </div>
-    @livewire('footer-menu')
 </x-guest-layout>
+<script>
+    function toggleParagraph(id) {
+      const para = document.getElementById(`para-${id}`);
+      const arrow = document.getElementById(`arrow-${id}`);
+      if (para.classList.contains('max-h-0')) {
+        para.classList.remove('max-h-0', 'opacity-0');
+        para.classList.add('max-h-screen', 'opacity-100');
+        arrow.classList.remove('rotate-0');
+        arrow.classList.add('rotate-180');
+      } else {
+        para.classList.add('max-h-0', 'opacity-0');
+        para.classList.remove('max-h-screen', 'opacity-100');
+        arrow.classList.add('rotate-0');
+        arrow.classList.remove('rotate-180');
+      }
+    }
+</script>
