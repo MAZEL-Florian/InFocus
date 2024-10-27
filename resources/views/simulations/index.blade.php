@@ -23,7 +23,7 @@
                             class="border-solid border border-infocus-oceanblue text-infocus-oceanblue py-2 px-4 rounded">
                             Revenir à l'accueil
                         </a>
-                        <a href="{{ route('simulation.index') }}"
+                        <a href="{{ route('simulation.photoType') }}"
                             class="bg-infocus-intenseblue text-white py-2 px-4 rounded">
                             Démarrer le questionnaire
                         </a>

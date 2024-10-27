@@ -31,10 +31,11 @@ Route::get('/blog', [BlogController::class, 'index'])->name('blog.index');
 Route::get('/faq', [FaqController::class, 'index'])->name('faq.index');
 
 
-Route::middleware(['auth:sanctum', config('jetstream.auth_session'),'verified', ])->group(function () {
+Route::middleware(['auth:sanctum', config('jetstream.auth_session'), 'verified',])->group(function () {
     Route::get('/simulation', [SimulationController::class, 'index'])->name('simulation.index');
+    Route::get('/simulation/photo-type', [SimulationController::class, 'photoType'])->name('simulation.photoType');
+    Route::post('/simulation/store', [SimulationController::class, 'store'])->name('simulation.store');
+
 });
 
-Route::middleware(['admin'])->prefix('admin')->group(function () {
-
-});
+Route::middleware(['admin'])->prefix('admin')->group(function () {});

@@ -2,7 +2,13 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\PhotoType;
+use App\Models\Simulation;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Redirect;
+use Illuminate\Support\Facades\Validator;
+use Symfony\Component\Console\Input\Input;
 
 class SimulationController extends Controller
 {
@@ -27,7 +33,20 @@ class SimulationController extends Controller
      */
     public function store(Request $request)
     {
-        //
+        $rules = array(
+            'photo_type_id' => 'required'
+        );
+        $validator = Validator::make($request->all(), $rules);
+        if ($validator->fails()) {
+            return Redirect::to('simulation/photoType')
+                ->withErrors($validator);
+        }
+        $simulation = new Simulation;
+        $simulation->photo_type_id = $request->photo_type_id;
+        $simulation->user_id = Auth::user()->id;
+        $simulation->save();
+
+        return redirect()->route('simulations.photos');
     }
 
     /**
@@ -60,5 +79,21 @@ class SimulationController extends Controller
     public function destroy(string $id)
     {
         //
+    }
+
+    public function photoType()
+    {
+
+        $photoTypes = PhotoType::all();
+
+        return view('simulations.photoType', compact('photoTypes'));
+    }
+
+    public function photos()
+    {
+
+        $photoTypes = PhotoType::all();
+
+        return view('simulations.photoType', compact('photoTypes'));
     }
 }
