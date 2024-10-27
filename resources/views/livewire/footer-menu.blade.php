@@ -34,11 +34,8 @@
                             <a href="#!" class="text-reset no-underline">A propos</a>
                         </p>
                     </div>
-                    <!-- Grid column -->
 
-                    <!-- Grid column -->
                     <div class="w-full md:w-1/4 lg:w-1/5 xl:w-1/6 mx-auto mb-4">
-                        <!-- Links -->
                         <h6 class="font-medium text-4xl mb-4">
                             Ressources
                         </h6>
@@ -52,9 +49,7 @@
                             <a href="{{ route('faq.index') }}" class="text-reset no-underline">FAQ</a>
                         </p>
                     </div>
-                    <!-- Grid column -->
 
-                    <!-- Grid column -->
                     <div class="w-full md:w-1/4 lg:w-1/5 xl:w-1/6 mx-auto mb-4">
                         <!-- Links -->
                         <h6 class="font-medium text-4xl mb-4">

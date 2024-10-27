@@ -10,8 +10,9 @@ class CreatePhotoTypesTable extends Migration
     {
         Schema::create('photo_types', function (Blueprint $table) {
             $table->id();
+            $table->char('uuid', 36)->unique();
             $table->string('name');
-            $table->string('image');
+            $table->string('image_url');
             $table->timestamps();
         });
     }

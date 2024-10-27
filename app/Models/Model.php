@@ -3,13 +3,12 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Model as EloquentModel;
 use Illuminate\Support\Str;
 
-class Faq extends Model
+class Model extends EloquentModel
 {
     use HasFactory;
-
 
     protected  static  function  boot()
     {
@@ -27,11 +26,16 @@ class Faq extends Model
     }
 
     protected $fillable = [
-        'question', 'answer', 'created_at', 'updated_at', 'user_id'
+        'name', 'camera_model', 'aperture', 'shutter_speed', 'iso', 'focal_length', 'price_wot', 'price'
     ];
 
-    public function user()
+    public function photos()
     {
-        return $this->belongsTo(User::class);
+        return $this->hasMany(Photo::class);
+    }
+
+    public function lenses()
+    {
+        return $this->hasMany(Lens::class);
     }
 }

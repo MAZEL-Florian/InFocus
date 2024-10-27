@@ -6,10 +6,9 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Str;
 
-class Faq extends Model
+class Photo extends Model
 {
     use HasFactory;
-
 
     protected  static  function  boot()
     {
@@ -27,11 +26,16 @@ class Faq extends Model
     }
 
     protected $fillable = [
-        'question', 'answer', 'created_at', 'updated_at', 'user_id'
+        'name', 'make', 'exposure_time', 'iso', 'focal_length'
     ];
 
-    public function user()
+    public function photoTypes()
     {
-        return $this->belongsTo(User::class);
+        return $this->hasMany(PhotoType::class);
+    }
+
+    public function model()
+    {
+        return $this->belongsTo(Model::class);
     }
 }

@@ -1,4 +1,4 @@
-<x-guest-layout>
+<x-app-layout>
     <div class="py-24">
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
             <img src="img/hikari-night.png" width="78px" height="111px">
@@ -19,16 +19,18 @@
                     </p>
 
                     <div class="flex justify-evenly">
-                        <a href="{{ route('home.index') }}" class="border-solid border border-infocus-oceanblue text-infocus-oceanblue py-2 px-4 rounded">
+                        <a href="{{ route('home.index') }}"
+                            class="border-solid border border-infocus-oceanblue text-infocus-oceanblue py-2 px-4 rounded">
                             Revenir à l'accueil
                         </a>
-                    <a href="{{ route('simulation.index') }}" class="bg-infocus-intenseblue text-white py-2 px-4 rounded">
-                        Démarrer le questionnaire
-                    </a>
+                        <a href="{{ route('simulation.index') }}"
+                            class="bg-infocus-intenseblue text-white py-2 px-4 rounded">
+                            Démarrer le questionnaire
+                        </a>
                     </div>
 
                 </div>
             </div>
         </div>
     </div>
-</x-guest-layout>
+</x-app-layout>

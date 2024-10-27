@@ -10,8 +10,11 @@ class CreateSimulationsTable extends Migration
     {
         Schema::create('simulations', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('photo_type_id')->constrained()->onDelete('cascade');
-            $table->foreignId('user_id')->constrained()->onDelete('cascade');
+            $table->char('uuid', 36)->unique();
+            $table->unsignedBigInteger('user_id');
+            $table->foreign('user_id')->references('id')->on('users')->constrained()->onDelete('cascade');
+            $table->unsignedBigInteger('photo_type_id');
+            $table->foreign('photo_type_id')->references('id')->on('photo_types')->constrained()->onDelete('cascade');
             $table->timestamps();
         });
     }

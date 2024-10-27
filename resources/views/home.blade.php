@@ -121,7 +121,7 @@
                     <li class="relative w-48 flex flex-shrink-0">
                         <div class="relative group">
                             <a href="#">
-                                <img src="{{ asset('storage/'.$photoType->image) }}" alt="{{ $photoType->name }}"
+                                <img src="{{ asset('storage/'.$photoType->image_url) }}" alt="{{ $photoType->name }}"
                                     class="object-contain h-48 w-48 rounded-lg object-cover object-center transition duration-500 ease-in-out transform brightness-75 group-hover:brightness-50" />
                             </a>
                             <div
@@ -200,7 +200,7 @@
                     <li class="relative w-48 flex flex-shrink-0">
                         <div class="relative group">
                             <a href="#">
-                                <img src="{{ asset('storage/'.$photoType->image) }}" alt="{{ $photoType->name }}"
+                                <img src="{{ asset('storage/'.$photoType->image_url) }}" alt="{{ $photoType->name }}"
                                     class="object-contain h-48 w-48 rounded-lg object-cover object-center transition duration-500 ease-in-out transform brightness-75 group-hover:brightness-50" />
                             </a>
                             <div
@@ -250,7 +250,7 @@
             class="flex max-md:flex-col max-md:justify-center items-center md:space-x-10 max-md:space-y-10 md:justify-evenly">
 
             @foreach ($partners as $partner)
-            <img src="{{ asset('storage/'.$partner->image) }}" class="h-16" alt="{{ $partner->name }}">
+            <img src="{{ asset('storage/'.$partner->image_url) }}" class="h-16" alt="{{ $partner->name }}">
             @endforeach
         </div>
         @endif

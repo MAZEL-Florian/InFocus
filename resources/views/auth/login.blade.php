@@ -1,5 +1,5 @@
 <x-guest-layout>
-    @livewire('navigation-menu')
+    {{-- @livewire('navigation-menu') --}}
     <x-authentication-card>
         <x-slot name="logo">
             <x-authentication-card-logo />
@@ -54,5 +54,5 @@
         </a>
         @endif
     </x-authentication-card>
-    @livewire('footer-menu')
+    {{-- @livewire('footer-menu') --}}
 </x-guest-layout>

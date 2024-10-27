@@ -11,11 +11,13 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('partners', function (Blueprint $table) {
+        Schema::create('lenses', function (Blueprint $table) {
             $table->id();
             $table->char('uuid', 36)->unique();
             $table->string('name');
-            $table->string('image_url');
+            $table->string('focal_length');
+            $table->decimal('price_wot', 8, 2);
+            $table->decimal('price', 8, 2);
             $table->timestamps();
         });
     }
@@ -25,6 +27,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('partners');
+        Schema::dropIfExists('lenses');
     }
 };

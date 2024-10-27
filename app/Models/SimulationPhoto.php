@@ -6,10 +6,9 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Str;
 
-class Faq extends Model
+class SimulationPhoto extends Model
 {
     use HasFactory;
-
 
     protected  static  function  boot()
     {
@@ -27,11 +26,11 @@ class Faq extends Model
     }
 
     protected $fillable = [
-        'question', 'answer', 'created_at', 'updated_at', 'user_id'
+       'simulation_id', 'photo_id'
     ];
 
-    public function user()
+    public function simulation()
     {
-        return $this->belongsTo(User::class);
+        return $this->belongsTo(Simulation::class);
     }
 }

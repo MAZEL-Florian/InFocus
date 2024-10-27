@@ -11,12 +11,8 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('partners', function (Blueprint $table) {
-            $table->id();
-            $table->char('uuid', 36)->unique();
-            $table->string('name');
-            $table->string('image_url');
-            $table->timestamps();
+        Schema::table('lenses', function (Blueprint $table) {
+            $table->string('image_url')->after('name');
         });
     }
 
@@ -25,6 +21,8 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('partners');
+        Schema::table('lenses', function (Blueprint $table) {
+            $table->dropColumn('image_url');
+        });
     }
 };

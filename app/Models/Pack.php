@@ -1,20 +1,20 @@
 <?php
 
-namespace App\Models;
+// namespace App\Models;
 
-use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Illuminate\Database\Eloquent\Model;
+// use Illuminate\Database\Eloquent\Factories\HasFactory;
+// use Illuminate\Database\Eloquent\Model;
 
-class Pack extends Model
-{
-    use HasFactory;
+// class Pack extends Model
+// {
+//     use HasFactory;
 
-    protected $fillable = [
-        'name', 'price', 'advantages', 'disadvantages'
-    ];
+//     protected $fillable = [
+//         'name', 'price', 'advantages', 'disadvantages'
+//     ];
 
-    public function packProducts()
-    {
-        return $this->hasMany(PackProduct::class);
-    }
-}
+//     public function packProducts()
+//     {
+//         return $this->hasMany(PackProduct::class);
+//     }
+// }

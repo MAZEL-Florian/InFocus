@@ -26,7 +26,7 @@ class PhotoTypeResource extends Resource
                 Forms\Components\TextInput::make('name')
                     ->required()
                     ->maxLength(255),
-                    Forms\Components\FileUpload::make('image')
+                    Forms\Components\FileUpload::make('image_url')
                     ->directory('phototypes-image')
                     ->required()
             ]);
@@ -38,7 +38,7 @@ class PhotoTypeResource extends Resource
             ->columns([
                 Tables\Columns\TextColumn::make('name')
                     ->searchable(),
-                    Tables\Columns\ImageColumn::make('image')
+                    Tables\Columns\ImageColumn::make('image_url')
                     ->searchable(),
                 Tables\Columns\TextColumn::make('created_at')
                     ->dateTime()
