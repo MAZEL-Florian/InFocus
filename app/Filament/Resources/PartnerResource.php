@@ -17,19 +17,31 @@ class PartnerResource extends Resource
 {
     protected static ?string $model = Partner::class;
 
+    public static function getNavigationLabel(): string
+    {
+        return 'Partenaires';
+    }
+
+    public static function getBreadcrumb(): string
+    {
+        return 'Partenaires';
+    }
+
     protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
 
     public static function form(Form $form): Form
     {
         return $form
-        ->schema([
-            Forms\Components\TextInput::make('name')
-                ->required()
-                ->maxLength(255),
+            ->schema([
+                Forms\Components\TextInput::make('name')
+                    ->required()
+                    ->label('Nom')
+                    ->maxLength(255),
                 Forms\Components\FileUpload::make('image')
-                ->directory('partners-logo')
-                ->required()
-        ]);
+                    ->label('Image')
+                    ->directory('partners-logo')
+                    ->required()
+            ]);
     }
 
     public static function table(Table $table): Table
@@ -38,7 +50,7 @@ class PartnerResource extends Resource
             ->columns([
                 Tables\Columns\TextColumn::make('name')
                     ->searchable(),
-                    Tables\Columns\ImageColumn::make('image')
+                Tables\Columns\ImageColumn::make('image')
                     ->searchable(),
                 Tables\Columns\TextColumn::make('created_at')
                     ->dateTime()

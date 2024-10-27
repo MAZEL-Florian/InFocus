@@ -17,6 +17,15 @@ class PhotoTypeResource extends Resource
 {
     protected static ?string $model = PhotoType::class;
 
+    public static function getNavigationLabel(): string
+    {
+        return 'Types de photographie';
+    }
+    public static function getBreadcrumb(): string
+    {
+        return 'Types de photographie';
+    }
+
     protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
 
     public static function form(Form $form): Form
@@ -25,8 +34,10 @@ class PhotoTypeResource extends Resource
             ->schema([
                 Forms\Components\TextInput::make('name')
                     ->required()
+                    ->label('Nom')
                     ->maxLength(255),
                     Forms\Components\FileUpload::make('image_url')
+                    ->label('Image')
                     ->directory('phototypes-image')
                     ->required()
             ]);

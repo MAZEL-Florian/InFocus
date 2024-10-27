@@ -2,9 +2,9 @@
 
 namespace App\Filament\Resources;
 
-use App\Filament\Resources\FaqResource\Pages;
-use App\Filament\Resources\FaqResource\RelationManagers;
-use App\Models\Faq;
+use App\Filament\Resources\LensResource\Pages;
+use App\Filament\Resources\LensResource\RelationManagers;
+use App\Models\Lens;
 use Filament\Forms;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
@@ -13,18 +13,18 @@ use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
 
-class FaqResource extends Resource
+class LensResource extends Resource
 {
-    protected static ?string $model = Faq::class;
+    protected static ?string $model = Lens::class;
 
     public static function getBreadcrumb(): string
     {
-        return 'FAQs';
+        return 'Objectifs';
     }
 
     public static function getNavigationLabel(): string
     {
-        return 'FAQ';
+        return 'Objectifs';
     }
 
     protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
@@ -33,15 +33,28 @@ class FaqResource extends Resource
     {
         return $form
             ->schema([
-                Forms\Components\TextInput::make('question')
-                    ->label('Question')
+                Forms\Components\TextInput::make('name')
+                    ->label('Nom')
                     ->required()
                     ->maxLength(255),
-                Forms\Components\Textarea::make('answer')
-                    ->label('Réponse')
+                Forms\Components\FileUpload::make('image_url')
+                    ->label('Image')
+                    ->image()
+                    ->required(),
+                Forms\Components\TextInput::make('focal_length')
+                    ->label('Distance Focale')
                     ->required()
-                    ->maxLength(65535)
-                    ->columnSpanFull(),
+                    ->maxLength(255),
+                Forms\Components\TextInput::make('price_wot')
+                    ->label('Prix HT')
+                    ->required()
+                    ->numeric()
+                    ->prefix('€'),
+                Forms\Components\TextInput::make('price')
+                    ->label('Prix')
+                    ->required()
+                    ->numeric()
+                    ->prefix('€'),
             ]);
     }
 
@@ -49,11 +62,20 @@ class FaqResource extends Resource
     {
         return $table
             ->columns([
-                Tables\Columns\TextColumn::make('question')
+                Tables\Columns\TextColumn::make('uuid')
+                    ->label('UUID')
                     ->searchable(),
-                Tables\Columns\TextColumn::make('answer')
-                    ->limit(50)
+                Tables\Columns\TextColumn::make('name')
                     ->searchable(),
+                Tables\Columns\ImageColumn::make('image_url'),
+                Tables\Columns\TextColumn::make('focal_length')
+                    ->searchable(),
+                Tables\Columns\TextColumn::make('price_wot')
+                    ->numeric()
+                    ->sortable(),
+                Tables\Columns\TextColumn::make('price')
+                    ->money()
+                    ->sortable(),
                 Tables\Columns\TextColumn::make('created_at')
                     ->dateTime()
                     ->sortable()
@@ -86,9 +108,9 @@ class FaqResource extends Resource
     public static function getPages(): array
     {
         return [
-            'index' => Pages\ListFaqs::route('/'),
-            'create' => Pages\CreateFaq::route('/create'),
-            'edit' => Pages\EditFaq::route('/{record}/edit'),
+            'index' => Pages\ListLenses::route('/'),
+            'create' => Pages\CreateLens::route('/create'),
+            'edit' => Pages\EditLens::route('/{record}/edit'),
         ];
     }
 }

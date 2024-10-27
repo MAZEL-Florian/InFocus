@@ -12,6 +12,8 @@ class ListPhotoTypes extends ListRecords
 {
     protected static string $resource = PhotoTypeResource::class;
 
+    protected static ?string $title = 'Liste des types de photographie';
+
     protected function getHeaderActions(): array
     {
         return [

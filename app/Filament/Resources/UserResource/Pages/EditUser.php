@@ -10,6 +10,8 @@ class EditUser extends EditRecord
 {
     protected static string $resource = UserResource::class;
 
+    protected static ?string $title = 'Éditer un utilisateur';
+
     protected function getHeaderActions(): array
     {
         return [

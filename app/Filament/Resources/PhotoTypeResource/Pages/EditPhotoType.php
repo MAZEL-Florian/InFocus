@@ -10,6 +10,8 @@ class EditPhotoType extends EditRecord
 {
     protected static string $resource = PhotoTypeResource::class;
 
+    protected static ?string $title = 'Éditer un type de photographie';
+
     protected function getHeaderActions(): array
     {
         return [

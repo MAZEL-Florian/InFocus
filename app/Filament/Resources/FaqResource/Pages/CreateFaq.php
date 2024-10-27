@@ -8,5 +8,7 @@ use Filament\Resources\Pages\CreateRecord;
 
 class CreateFaq extends CreateRecord
 {
+    protected static ?string $title = 'Créer une FAQ';
+
     protected static string $resource = FaqResource::class;
 }
