@@ -5,10 +5,20 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Str;
+use Illuminate\Support\Facades\Storage;
+use Intervention\Image\ImageManager;
+use Illuminate\Http\UploadedFile;
+use Intervention\Image\Laravel\Facades\Image;
+
+use Intervention\Image\Drivers\Gd\Driver;
 
 class Photo extends Model
 {
     use HasFactory;
+
+    protected $casts = [
+        'image_url' => 'array',
+    ];
 
     protected  static  function  boot()
     {
@@ -26,13 +36,15 @@ class Photo extends Model
     }
 
     protected $fillable = [
-        'name', 'make', 'exposure_time', 'iso', 'focal_length'
+        'image_url', 'make', 'exposure_time', 'iso', 'focal_length', 'model_id', 'lens_id'
     ];
 
     public function photoTypes()
     {
-        return $this->hasMany(PhotoType::class);
+        return $this->belongsToMany(PhotoType::class, 'photo_type_photos');
     }
+    
+
 
     public function model()
     {

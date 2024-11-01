@@ -13,7 +13,6 @@ return new class extends Migration
     {
         Schema::create('photo_type_photos', function (Blueprint $table) {
             $table->id();
-            $table->char('uuid', 36)->unique();
             $table->unsignedBigInteger('photo_type_id');
             $table->foreign('photo_type_id')->references('id')->on('photo_types')->constrained()->onDelete('cascade');
             $table->unsignedBigInteger('photo_id');

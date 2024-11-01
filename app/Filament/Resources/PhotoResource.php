@@ -5,6 +5,8 @@ namespace App\Filament\Resources;
 use App\Filament\Resources\PhotoResource\Pages;
 use App\Filament\Resources\PhotoResource\RelationManagers;
 use App\Models\Photo;
+use App\Models\PhotoType;
+use Closure;
 use Filament\Forms;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
@@ -12,6 +14,8 @@ use Filament\Tables;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
+use Illuminate\Support\Facades\Storage;
+use Intervention\Image\Laravel\Facades\Image;
 
 class PhotoResource extends Resource
 {
@@ -35,23 +39,17 @@ class PhotoResource extends Resource
                 Forms\Components\FileUpload::make('image_url')
                     ->image()
                     ->label('Image')
-                    ->required(),
-                Forms\Components\TextInput::make('make')
+                    ->multiple()
                     ->required()
-                    ->label('Marque')
-                    ->maxLength(255),
-                Forms\Components\TextInput::make('exposure_time')
+                    ->directory('photos'),
+                Forms\Components\Select::make('photo_type_id')
+                    ->label('Type de Photographie')
+                    ->multiple()
+                    ->relationship('photoTypes', 'name')
+                    ->options(PhotoType::all()->pluck('name', 'id'))
                     ->required()
-                    ->label('Temps d\'exposition')
-                    ->maxLength(255),
-                Forms\Components\TextInput::make('iso')
-                    ->required()
-                    ->label('ISO')
-                    ->numeric(),
-                Forms\Components\TextInput::make('focal_length')
-                    ->required()
-                    ->label('Distance Focale')
-                    ->maxLength(255),
+                    ->searchable(),
+
             ]);
     }
 
@@ -59,43 +57,48 @@ class PhotoResource extends Resource
     {
         return $table
             ->columns([
-                Tables\Columns\TextColumn::make('model_id')
-                    ->numeric()
-                    ->sortable(),
-                Tables\Columns\TextColumn::make('lens_id')
-                    ->numeric()
-                    ->sortable(),
-                Tables\Columns\TextColumn::make('uuid')
-                    ->label('UUID')
-                    ->searchable(),
-                Tables\Columns\ImageColumn::make('image_url'),
+                Tables\Columns\ImageColumn::make('image_url')
+                    ->label('Image'),
                 Tables\Columns\TextColumn::make('make')
+                    ->label('Marque')
                     ->searchable(),
                 Tables\Columns\TextColumn::make('exposure_time')
+                    ->label('Temps d\'exposition')
                     ->searchable(),
                 Tables\Columns\TextColumn::make('iso')
+                    ->label('ISO')
                     ->numeric()
                     ->sortable(),
                 Tables\Columns\TextColumn::make('focal_length')
+                    ->label('Distance Focale')
                     ->searchable(),
                 Tables\Columns\TextColumn::make('created_at')
+                    ->label('Date de création')
                     ->dateTime()
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
                 Tables\Columns\TextColumn::make('updated_at')
+                    ->label('Date de mise à jour')
                     ->dateTime()
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
+                Tables\Columns\TextColumn::make('photoTypes.name')
+                    ->label('Types de Photographie')
+                    ->badge()
+                    ->separator(', ')
+                    ->sortable(),
             ])
             ->filters([
                 //
             ])
             ->actions([
                 Tables\Actions\EditAction::make(),
+
             ])
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([
                     Tables\Actions\DeleteBulkAction::make(),
+
                 ]),
             ]);
     }

@@ -29,8 +29,8 @@ class PhotoType extends Model
         'name'
     ];
 
-    public function photoTypeImages()
+    public function photoTypePhotos()
     {
-        return $this->hasMany(Photo::class);
+        return $this->belongsToMany(Photo::class);
     }
 }
