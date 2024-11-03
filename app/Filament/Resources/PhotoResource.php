@@ -62,6 +62,10 @@ class PhotoResource extends Resource
                 Tables\Columns\TextColumn::make('make')
                     ->label('Marque')
                     ->searchable(),
+                Tables\Columns\TextColumn::make('model_name')
+                    ->label('Modèle')
+                    ->sortable()
+                    ->searchable(),
                 Tables\Columns\TextColumn::make('exposure_time')
                     ->label('Temps d\'exposition')
                     ->searchable(),

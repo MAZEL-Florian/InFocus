@@ -24,7 +24,6 @@ class Lens extends EloquentModel
     {
         return "uuid";
     }
-
     protected $fillable = [
         'name', 'focal_length', 'price_wot', 'price'
     ];

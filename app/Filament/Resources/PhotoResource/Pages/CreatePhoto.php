@@ -22,18 +22,14 @@ class CreatePhoto extends CreateRecord
         foreach ($data['image_url'] as $imagePath) {
             $img = Image::read('storage/' . $imagePath);
             $metaData = $img->exif();
-    
-            $make = $metaData->get('IFD0.Make') ?? null;
-            $exposureTime = $metaData->get('EXIF.ExposureTime') ?? null;
-            $iso = $metaData->get('EXIF.ISOSpeedRatings') ?? null;
-            $focalLength = $metaData->get('EXIF.FocalLength') ?? null;
-    
+
             $photo = Photo::create([
                 'image_url' => $imagePath,
-                'make' => $make,
-                'exposure_time' => $exposureTime,
-                'iso' => $iso,
-                'focal_length' => $focalLength,
+                'make' => $metaData->get('IFD0.Make') ?? null,
+                'exposure_time' => $metaData->get('EXIF.ExposureTime') ?? null,
+                'iso' => $metaData->get('EXIF.ISOSpeedRatings') ?? null,
+                'focal_length' => $metaData->get('EXIF.FocalLength') ?? null,
+                'model_name' =>$metaData->get('IFD0.Model') ?? null
             ]);
     
             if (!empty($data['selected_photo_types'])) {

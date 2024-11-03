@@ -35,6 +35,10 @@ Route::middleware(['auth:sanctum', config('jetstream.auth_session'), 'verified',
     Route::get('/simulation', [SimulationController::class, 'index'])->name('simulation.index');
     Route::get('/simulation/photo-type', [SimulationController::class, 'photoType'])->name('simulation.photoType');
     Route::post('/simulation/store', [SimulationController::class, 'store'])->name('simulation.store');
+    Route::get('/simulation/{simulation}/step-one', [SimulationController::class, 'createStepOne'])->name('simulation.create-step-one');
+    Route::post('/simulation/{simulation}/step-one', [SimulationController::class, 'postStepOne'])->name('simulation.post-step-one');
+    Route::get('/simulation/{simulation}/step-two', [SimulationController::class, 'createStepTwo'])->name('simulation.create-step-two');
+
 
 });
 

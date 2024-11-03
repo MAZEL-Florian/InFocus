@@ -36,7 +36,7 @@ class Photo extends Model
     }
 
     protected $fillable = [
-        'image_url', 'make', 'exposure_time', 'iso', 'focal_length', 'model_id', 'lens_id'
+        'image_url', 'make', 'exposure_time', 'iso', 'focal_length', 'model_id', 'lens_id', 'model_name'
     ];
 
     public function photoTypes()
