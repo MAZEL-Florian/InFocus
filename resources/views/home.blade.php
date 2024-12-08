@@ -40,7 +40,7 @@
                 <h1 class="py-10 text-5xl font-abeezee">Essayez, Apprenez, Achetez <br>si vous le
                     souhaitez
                 </h1>
-                <img src="img/hikari-night.png" width="78px" height="111px">
+                <img src="img/hikari-right.png" width="78px" height="111px">
                 <a href="#" class="infocus-btn-primary text-infocus-twilightblue font-medium">{{ __('Find my ideal gear') }}</a>
             </div>
 

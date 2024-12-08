@@ -1,7 +1,7 @@
 <x-app-layout>
     <div class="py-24">
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
-            <img src="../../img/hikari-night.png" width="78px" height="111px">
+            <img src="../../img/hikari-right.png" width="78px" height="111px">
             <div class="text-infocus-icewhite overflow-hidden sm:rounded-lg p-6">
                 <h1 class="text-4xl font-bold mb-10">Choix de la focale</h1>
                 

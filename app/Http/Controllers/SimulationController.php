@@ -108,25 +108,31 @@ class SimulationController extends Controller
             ->where('photo_types.id', '=', $simulation->photo_type_id)
             ->get()
             ->groupBy('make');
-
+    
         $selectedPhotos = [];
-        $counter = 0;
-
-        while (count($selectedPhotos) < 9 && $counter < 3) {
+        $maxSeries = 3; // Nombre de séries
+        $photosPerSeries = 3; // Nombre de photos par série
+    
+        for ($series = 0; $series < $maxSeries; $series++) {
             foreach ($photos as $make => $photoGroup) {
-                if (isset($photoGroup[$counter])) {
-                    $selectedPhotos[] = $photoGroup[$counter];
-                }
-                if (count($selectedPhotos) >= 9) {
-                    break;
+                $photoIndex = $series; // Une photo différente par série
+                if (isset($photoGroup[$photoIndex])) {
+                    $selectedPhotos[$series][] = $photoGroup[$photoIndex];
                 }
             }
-            $counter++;
         }
-
-        $photosByGroups = array_chunk($selectedPhotos, 3);
-        return view('simulations.step-one', compact('photosByGroups', 'simulation'));
+    
+        // Réorganiser pour s'assurer que chaque série contient exactement 3 photos
+        foreach ($selectedPhotos as $index => $series) {
+            $selectedPhotos[$index] = array_slice($series, 0, $photosPerSeries);
+        }
+    
+        return view('simulations.step-one', [
+            'photosByGroups' => $selectedPhotos,
+            'simulation' => $simulation
+        ]);
     }
+    
 
     public function postStepOne(Request $request, Simulation $simulation)
     {
