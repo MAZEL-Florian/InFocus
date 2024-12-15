@@ -51,8 +51,8 @@ class SimulationController extends Controller
         //     ->where('id', '=', $request->photo_type_id)->get();
 
 
-            return redirect()->route('simulations.createStepOne', ['simulation' => $simulation]);
-            // return view('simulations.step-one', compact('simulation'));
+        return redirect()->route('simulations.createStepOne', ['simulation' => $simulation]);
+        // return view('simulations.step-one', compact('simulation'));
     }
 
     /**
@@ -140,84 +140,153 @@ class SimulationController extends Controller
 
     public function postStepOne(Request $request, Simulation $simulation)
     {
-        // dd($simulation, request()->selectedPhotos);
-        // dd(request()->selectedPhotos);
-        $rules = array(
+        $rules = [
             'selectedPhotos' => 'required|array',
             'selectedPhotos.*' => 'exists:photos,id',
-        );
+        ];
+
         $validator = Validator::make($request->all(), $rules);
         if ($validator->fails()) {
             return Redirect::to('simulation/' . $simulation->uuid . '/step-one')
                 ->withErrors($validator);
         }
+
         $selectedPhotos = Photo::whereIn('id', $request->input('selectedPhotos'))->get();
-        // dd($selectedPhotos);
 
         foreach ($selectedPhotos as $photo) {
-            // dd($photo);
-            $simulationPhoto = new SimulationPhoto;
-            $simulationPhoto->simulation_id = $simulation->id;
-            $simulationPhoto->photo_id = $photo->id;
-            $simulationPhoto->save();
+            SimulationPhoto::create([
+                'simulation_id' => $simulation->id,
+                'photo_id' => $photo->id,
+            ]);
         }
 
-        // Récupérer des photos correspondant a la colorimétrie
-        // Exemple : If 2 canon, récupérer toutes les photos réalisées par canon
-        // If 1 canon, 1 nikon et 1 sony, récupérer des photos différentes
-        $makeCounts = $selectedPhotos->groupBy('make')->map->count();
-        // Déterminer la condition pour la récupération des photos supplémentaires
-        if ($makeCounts->count() === 1) {
-            // Si l'utilisateur a sélectionné plusieurs fois la même marque
-            $make = $makeCounts->keys()->first();
-            $photos = Photo::where('make', $make)
-                ->whereHas('photoTypes', function ($query) use ($simulation) {
-                    $query->where('photo_types.id', $simulation->photo_type_id);
-                })
-                ->get()
-                ->groupBy('make');
-        } else {
-            // Si l'utilisateur a sélectionné différentes marques
-            $photos = Photo::whereHas('photoTypes', function ($query) use ($simulation) {
-                $query->where('photo_types.id', $simulation->photo_type_id);
-            })
-                ->get()
-                ->groupBy('make');
-        }
-        // dd($photos);
+        // Transmettre les IDs des photos sélectionnées via la session
+        session(['selectedPhotos' => $request->input('selectedPhotos')]);
 
-
-        // dd($validator);
-
-        return redirect()->route('simulation.create-step-two', compact('simulation', 'photos'));
+        return redirect()->route('simulation.create-step-two', compact('simulation'));
     }
+
 
     public function createStepTwo(Request $request, Simulation $simulation)
     {
-        $photos = Photo::select('photos.*')
-            ->join('photo_type_photos', 'photos.id', '=', 'photo_type_photos.photo_id')
-            ->join('photo_types', 'photo_type_photos.photo_type_id', '=', 'photo_types.id')
-            ->where('photo_types.id', '=', $simulation->photo_type_id)
-            ->get()
-            ->groupBy('make');
-
+        $selectedPhotoIds = session('selectedPhotos', []);
+    
+        if (empty($selectedPhotoIds)) {
+            return redirect()->route('simulation.create-step-one', compact('simulation'))
+                ->withErrors(['error' => 'Aucune photo sélectionnée.']);
+        }
+    
+        $selectedPhotos = Photo::whereIn('id', $selectedPhotoIds)->get();
+    
+        $makeCounts = $selectedPhotos->groupBy('make')->map->count();
+    
+        $dominantMake = $makeCounts->sortDesc()->keys()->first();
+    
+        $photos = collect();
+    
+        if ($makeCounts->count() === 1 || $makeCounts[$dominantMake] > 1) {
+            $photos = Photo::where('make', $dominantMake)
+                ->whereHas('photoTypes', function ($query) use ($simulation) {
+                    $query->where('photo_types.id', $simulation->photo_type_id);
+                })
+                ->orderBy('focal_length')
+                ->get();
+        } else {
+            $photos = Photo::whereHas('photoTypes', function ($query) use ($simulation) {
+                $query->where('photo_types.id', $simulation->photo_type_id);
+            })
+                ->orderBy('focal_length')
+                ->get();
+        }
+    
         $selectedPhotos = [];
-        $counter = 0;
-
-        while (count($selectedPhotos) < 9 && $counter < 3) {
-            foreach ($photos as $make => $photoGroup) {
-                if (isset($photoGroup[$counter])) {
-                    $selectedPhotos[] = $photoGroup[$counter];
-                }
-                if (count($selectedPhotos) >= 9) {
-                    break;
+        $maxSeries = 3; 
+        $photosPerSeries = 3; 
+        $usedPhotoIds = [];
+    
+        if ($makeCounts->count() === 1 || $makeCounts[$dominantMake] > 1) {
+            for ($series = 0; $series < $maxSeries; $series++) {
+                $availablePhotos = $photos->reject(function ($photo) use ($usedPhotoIds) {
+                    return in_array($photo->id, $usedPhotoIds);
+                });
+    
+                foreach ($availablePhotos as $photo) {
+                    if (count($selectedPhotos[$series] ?? []) < $photosPerSeries) {
+                        $selectedPhotos[$series][] = $photo;
+                        $usedPhotoIds[] = $photo->id;
+                    }
+    
+                    if (count($selectedPhotos[$series] ?? []) >= $photosPerSeries) {
+                        break;
+                    }
                 }
             }
-            $counter++;
+        } else {
+            $photosByMake = $photos->groupBy('make');
+    
+            for ($series = 0; $series < $maxSeries; $series++) {
+                foreach ($makeCounts->sortDesc()->keys() as $make) {
+                    $availablePhotos = $photosByMake[$make]->reject(function ($photo) use ($usedPhotoIds) {
+                        return in_array($photo->id, $usedPhotoIds);
+                    });
+    
+                    if ($availablePhotos->isNotEmpty()) {
+                        $photo = $availablePhotos->first();
+    
+                        if (count($selectedPhotos[$series] ?? []) < $photosPerSeries) {
+                            $selectedPhotos[$series][] = $photo;
+                            $usedPhotoIds[] = $photo->id;
+                        }
+                    }
+    
+                    if (count($selectedPhotos[$series] ?? []) >= $photosPerSeries) {
+                        break;
+                    }
+                }
+            }
+        }
+    
+        foreach ($selectedPhotos as $index => $series) {
+            $selectedPhotos[$index] = array_slice($series, 0, $photosPerSeries);
+        }
+    
+        $photosByGroups = $selectedPhotos;
+        // dd($photosByGroups);
+        return view('simulations.step-two', [
+            'photosByGroups' => $photosByGroups,
+            'simulation' => $simulation,
+        ]);
+    }
+    
+    
+    
+
+    public function postStepTwo(Request $request, Simulation $simulation)
+    {
+        dd('step 2 ');
+        $rules = [
+            'selectedPhotos' => 'required|array',
+            'selectedPhotos.*' => 'exists:photos,id',
+        ];
+
+        $validator = Validator::make($request->all(), $rules);
+        if ($validator->fails()) {
+            return Redirect::to('simulation/' . $simulation->uuid . '/step-one')
+                ->withErrors($validator);
         }
 
-        $photosByGroups = array_chunk($selectedPhotos, 3);
-        dd($photosByGroups);
-        return view('simulations.step-two', compact('photosByGroups', 'simulation'));
+        $selectedPhotos = Photo::whereIn('id', $request->input('selectedPhotos'))->get();
+
+        foreach ($selectedPhotos as $photo) {
+            SimulationPhoto::create([
+                'simulation_id' => $simulation->id,
+                'photo_id' => $photo->id,
+            ]);
+        }
+
+        // Transmettre les IDs des photos sélectionnées via la session
+        session(['selectedPhotos' => $request->input('selectedPhotos')]);
+
+        return redirect()->route('simulation.create-step-two', compact('simulation'));
     }
 }
