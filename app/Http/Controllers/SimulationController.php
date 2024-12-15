@@ -47,9 +47,12 @@ class SimulationController extends Controller
         $simulation->photo_type_id = $request->photo_type_id;
         $simulation->user_id = Auth::user()->id;
         $simulation->save();
+        // $photoType = PhotoType::select('name')
+        //     ->where('id', '=', $request->photo_type_id)->get();
 
-        return redirect()->route('simulation.create-step-one', compact('simulation'));
-        // return view('simulations.step-one', compact('simulation'));
+
+            return redirect()->route('simulations.createStepOne', ['simulation' => $simulation]);
+            // return view('simulations.step-one', compact('simulation'));
     }
 
     /**
@@ -108,11 +111,10 @@ class SimulationController extends Controller
             ->where('photo_types.id', '=', $simulation->photo_type_id)
             ->get()
             ->groupBy('make');
-    
         $selectedPhotos = [];
         $maxSeries = 3; // Nombre de séries
         $photosPerSeries = 3; // Nombre de photos par série
-    
+
         for ($series = 0; $series < $maxSeries; $series++) {
             foreach ($photos as $make => $photoGroup) {
                 $photoIndex = $series; // Une photo différente par série
@@ -121,22 +123,24 @@ class SimulationController extends Controller
                 }
             }
         }
-    
+
         // Réorganiser pour s'assurer que chaque série contient exactement 3 photos
         foreach ($selectedPhotos as $index => $series) {
             $selectedPhotos[$index] = array_slice($series, 0, $photosPerSeries);
         }
-    
+        $photoType = $simulation->photoType;
+
         return view('simulations.step-one', [
             'photosByGroups' => $selectedPhotos,
-            'simulation' => $simulation
+            'simulation' => $simulation,
+            'photoType' => $photoType,
         ]);
     }
-    
+
 
     public function postStepOne(Request $request, Simulation $simulation)
     {
-        // dd($simulation);
+        // dd($simulation, request()->selectedPhotos);
         // dd(request()->selectedPhotos);
         $rules = array(
             'selectedPhotos' => 'required|array',
@@ -213,6 +217,7 @@ class SimulationController extends Controller
         }
 
         $photosByGroups = array_chunk($selectedPhotos, 3);
+        dd($photosByGroups);
         return view('simulations.step-two', compact('photosByGroups', 'simulation'));
     }
 }

@@ -33,4 +33,8 @@ class Simulation extends Model
     {
         return $this->belongsTo(User::class);
     }
+    public function photoType()
+{
+    return $this->belongsTo(PhotoType::class);
+}
 }

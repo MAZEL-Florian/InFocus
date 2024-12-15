@@ -1,9 +1,11 @@
 <x-app-layout>
     <div class="relative py-24 bg-darkblue">
         <!-- Overlay -->
-        <div id="overlay" class="absolute inset-0 flex items-center justify-center z-10 transition-opacity duration-500 bg-black bg-opacity-50">
+        <div id="overlay"
+            class="absolute inset-0 flex items-center justify-center z-10 transition-opacity duration-500 bg-black bg-opacity-50">
             <div class="text-center p-8 rounded-lg">
-                <img src="{{ asset('img/hikari-right.png') }}" alt="Hikari" width="78" height="111" class="mx-auto mb-6">
+                <img src="{{ asset('img/hikari-front.png') }}" alt="Hikari" width="78" height="111"
+                    class="mx-auto mb-6">
                 <h2 class="text-white text-2xl font-semibold mb-4">
                     Salut, moi c’est Hikari ! <br>
                     Je t’accompagne tout au long de ce simulateur pour trouver ton pack de matériel idéal.
@@ -26,14 +28,18 @@
 
                 @if($photoTypes->isNotEmpty())
                 <div class="relative">
-                    <div id="slider" class="flex overflow-x-scroll custom-scrollbar space-x-4 scroll-smooth snap-x snap-mandatory pb-6">
+                    <div id="slider"
+                        class="flex overflow-x-scroll custom-scrollbar space-x-4 scroll-smooth snap-x snap-mandatory pb-6">
                         @foreach($photoTypes as $photoType)
-                        <div class="snap-center flex-shrink-0" style="width: 668px; height: 422px; overflow: hidden; border-radius: 10px;">
+                        <div class="snap-center flex-shrink-0"
+                            style="width: 668px; height: 422px; overflow: hidden; border-radius: 10px;">
                             <a href="#" onclick="selectPhotoType({{ $photoType->id }}); return false;">
                                 <div id="photo-{{ $photoType->id }}" class="relative group photo-item">
-                                    <img src="{{ asset('storage/'.$photoType->image_url) }}" alt="{{ $photoType->name }}"
+                                    <img src="{{ asset('storage/'.$photoType->image_url) }}"
+                                        alt="{{ $photoType->name }}"
                                         class="h-[422px] w-[668px] object-cover transition-transform duration-300 ease-in-out group-hover:scale-105">
-                                    <div class="absolute bottom-0 left-0 w-full bg-black bg-opacity-50 text-white text-center py-2 rounded-b-lg">
+                                    <div
+                                        class="absolute bottom-0 left-0 w-full bg-black bg-opacity-50 text-white text-center py-2 rounded-b-lg">
                                         <h3 class="text-lg font-medium">{{ $photoType->name }}</h3>
                                     </div>
                                 </div>
@@ -44,7 +50,8 @@
                 </div>
                 @endif
 
-                <button type="submit" class="mt-6 bg-blue-500 text-white py-2 px-4 rounded hover:bg-blue-600 transition">
+                <button type="submit"
+                    class="mt-6 bg-blue-500 text-white py-2 px-4 rounded hover:bg-blue-600 transition">
                     Valider
                 </button>
             </form>
@@ -82,15 +89,15 @@
     }
 
     .custom-scrollbar::-webkit-scrollbar-thumb:hover {
-        background: #888; 
+        background: #888;
     }
 
     .custom-scrollbar::-webkit-scrollbar-track {
-        background: transparent; 
+        background: transparent;
     }
 
     .photo-item {
-        overflow: hidden; 
+        overflow: hidden;
         position: relative;
         border-radius: 10px;
     }
@@ -100,7 +107,7 @@
     }
 
     .photo-item:hover img {
-        transform: scale(1.05); 
+        transform: scale(1.05);
     }
 
     .photo-item {

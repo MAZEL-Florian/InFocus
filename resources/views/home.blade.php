@@ -41,7 +41,7 @@
                     souhaitez
                 </h1>
                 <img src="img/hikari-right.png" width="78px" height="111px">
-                <a href="#" class="infocus-btn-primary text-infocus-twilightblue font-medium">{{ __('Find my ideal gear') }}</a>
+                <a href="#" class="infocus-btn-primary text-infocus-twilightblue py-2 px-4 rounded font-medium">{{ __('Find my ideal gear') }}</a>
             </div>
 
         </div>
@@ -100,7 +100,7 @@
                 </div>
             </div>
             <div class="col-start-6 col-end-10 flex justify-center items-end mt-4 mx-auto">
-                <a href="#" class="infocus-btn-primary text-infocus-twilightblue font-medium">{{ __('Find my ideal gear') }}</a>
+                <a href="#" class="infocus-btn-primary text-infocus-twilightblue py-2 px-4 rounded  font-medium">{{ __('Find my ideal gear') }}</a>
 
             </div>
         </div>
@@ -183,7 +183,7 @@
                 </div>
             </div>
             <div class="py-10">
-                <a href="#" class="infocus-btn-primary text-infocus-twilightblue font-medium">{{ __('Find my ideal gear') }}</a>
+                <a href="#" class="infocus-btn-primary text-infocus-twilightblue py-2 px-4 rounded  font-medium">{{ __('Find my ideal gear') }}</a>
             </div>
         </div>
 
@@ -280,7 +280,7 @@
                         choisir
                         ?</p>
                     <div class="col-start-6 col-end-10 flex justify-center items-end mt-4 mx-auto">
-                        <a href="#" class="infocus-btn-primary text-infocus-twilightblue font-medium">Lire</a>
+                        <a href="#" class="infocus-btn-primary text-infocus-twilightblue py-2 px-4 rounded  font-medium">Lire</a>
 
                     </div>
                 </div>
@@ -306,7 +306,7 @@
                         choisir
                         ?</p>
                     <div class="col-start-6 col-end-10 flex justify-center items-end mt-4 mx-auto">
-                        <a href="#" class="infocus-btn-primary text-infocus-twilightblue font-medium">Lire</a>
+                        <a href="#" class="infocus-btn-primary text-infocus-twilightblue py-2 px-4 rounded  font-medium">Lire</a>
 
                     </div>
                 </div>
@@ -331,7 +331,7 @@
                         choisir
                         ?</p>
                     <div class="col-start-6 col-end-10 flex justify-center items-end mt-4 mx-auto">
-                        <a href="#" class="infocus-btn-primary text-infocus-twilightblue font-medium">Lire</a>
+                        <a href="#" class="infocus-btn-primary text-infocus-twilightblue py-2 px-4 rounded  font-medium">Lire</a>
 
                     </div>
                 </div>
