@@ -40,9 +40,11 @@ class CreatePhoto extends CreateRecord
                 'model_name' => $metaData->get('IFD0.Model') ?? null
             ]);
 
-            if (!empty($data['selected_photo_types'])) {
-                $photo->photoTypes()->sync($data['selected_photo_types']);
+            if (!empty($data['photo_types'])) {
+                $photo->photoTypes()->sync($data['photo_types']);
             }
+            
+            
 
             $photos[] = $photo;
         }

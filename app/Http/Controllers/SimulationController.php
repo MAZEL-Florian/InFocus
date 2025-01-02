@@ -51,7 +51,7 @@ class SimulationController extends Controller
         //     ->where('id', '=', $request->photo_type_id)->get();
 
 
-        return redirect()->route('simulations.createStepOne', ['simulation' => $simulation]);
+        return redirect()->route('simulation.create-step-one', ['simulation' => $simulation]);
         // return view('simulations.step-one', compact('simulation'));
     }
 
@@ -157,6 +157,7 @@ class SimulationController extends Controller
             SimulationPhoto::create([
                 'simulation_id' => $simulation->id,
                 'photo_id' => $photo->id,
+                'step' => 1
             ]);
         }
 
@@ -263,7 +264,7 @@ class SimulationController extends Controller
 
     public function postStepTwo(Request $request, Simulation $simulation)
     {
-        dd('step 2 ');
+        // dd(request()->all());
         $rules = [
             'selectedPhotos' => 'required|array',
             'selectedPhotos.*' => 'exists:photos,id',
@@ -276,11 +277,12 @@ class SimulationController extends Controller
         }
 
         $selectedPhotos = Photo::whereIn('id', $request->input('selectedPhotos'))->get();
-
+        // dd($selectedPhotos);
         foreach ($selectedPhotos as $photo) {
             SimulationPhoto::create([
                 'simulation_id' => $simulation->id,
                 'photo_id' => $photo->id,
+                'step' => 2
             ]);
         }
 

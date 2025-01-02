@@ -42,14 +42,15 @@ class PhotoResource extends Resource
                     ->multiple()
                     ->required()
                     ->directory('photos'),
-                Forms\Components\Select::make('photo_type_id')
-                    ->label('Type de Photographie')
+                    Forms\Components\Select::make('photo_types')
+                    ->label('Types de Photographie')
                     ->multiple()
-                    ->relationship('photoTypes', 'name')
-                    ->options(PhotoType::all()->pluck('name', 'id'))
+                    ->options(
+                        PhotoType::query()->pluck('name', 'id')
+                    )
                     ->required()
                     ->searchable(),
-
+                
             ]);
     }
 
