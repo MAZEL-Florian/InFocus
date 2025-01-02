@@ -23,6 +23,8 @@ class CreatePhoto extends CreateRecord
 
         foreach ($data['image_url'] as $imagePath) {
             $img = Image::read('storage/' . $imagePath);
+            dd($img, $img->exif());
+
             $pathInfo = pathinfo($imagePath);
             $webpPath = $pathInfo['dirname'] . '/' . $pathInfo['filename'] . '.webp';
             $manager = new ImageManager(new Driver());
@@ -30,7 +32,6 @@ class CreatePhoto extends CreateRecord
             $encoded = $image->toWebp(60)->save('storage/' . $webpPath);
             unlink('storage/' . $imagePath);
             $metaData = $img->exif();
-
             $photo = Photo::create([
                 'image_url' => $webpPath,
                 'make' => $metaData->get('IFD0.Make') ?? null,

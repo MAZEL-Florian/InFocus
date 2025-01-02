@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Lens;
+use App\Models\Model;
 use App\Models\Photo;
 use App\Models\PhotoType;
 use App\Models\Simulation;
@@ -171,20 +173,20 @@ class SimulationController extends Controller
     public function createStepTwo(Request $request, Simulation $simulation)
     {
         $selectedPhotoIds = session('selectedPhotos', []);
-    
+
         if (empty($selectedPhotoIds)) {
             return redirect()->route('simulation.create-step-one', compact('simulation'))
                 ->withErrors(['error' => 'Aucune photo sélectionnée.']);
         }
-    
+
         $selectedPhotos = Photo::whereIn('id', $selectedPhotoIds)->get();
-    
+
         $makeCounts = $selectedPhotos->groupBy('make')->map->count();
-    
+
         $dominantMake = $makeCounts->sortDesc()->keys()->first();
-    
+
         $photos = collect();
-    
+
         if ($makeCounts->count() === 1 || $makeCounts[$dominantMake] > 1) {
             $photos = Photo::where('make', $dominantMake)
                 ->whereHas('photoTypes', function ($query) use ($simulation) {
@@ -199,24 +201,24 @@ class SimulationController extends Controller
                 ->orderBy('focal_length')
                 ->get();
         }
-    
+
         $selectedPhotos = [];
-        $maxSeries = 3; 
-        $photosPerSeries = 3; 
+        $maxSeries = 3;
+        $photosPerSeries = 3;
         $usedPhotoIds = [];
-    
+
         if ($makeCounts->count() === 1 || $makeCounts[$dominantMake] > 1) {
             for ($series = 0; $series < $maxSeries; $series++) {
                 $availablePhotos = $photos->reject(function ($photo) use ($usedPhotoIds) {
                     return in_array($photo->id, $usedPhotoIds);
                 });
-    
+
                 foreach ($availablePhotos as $photo) {
                     if (count($selectedPhotos[$series] ?? []) < $photosPerSeries) {
                         $selectedPhotos[$series][] = $photo;
                         $usedPhotoIds[] = $photo->id;
                     }
-    
+
                     if (count($selectedPhotos[$series] ?? []) >= $photosPerSeries) {
                         break;
                     }
@@ -224,33 +226,33 @@ class SimulationController extends Controller
             }
         } else {
             $photosByMake = $photos->groupBy('make');
-    
+
             for ($series = 0; $series < $maxSeries; $series++) {
                 foreach ($makeCounts->sortDesc()->keys() as $make) {
                     $availablePhotos = $photosByMake[$make]->reject(function ($photo) use ($usedPhotoIds) {
                         return in_array($photo->id, $usedPhotoIds);
                     });
-    
+
                     if ($availablePhotos->isNotEmpty()) {
                         $photo = $availablePhotos->first();
-    
+
                         if (count($selectedPhotos[$series] ?? []) < $photosPerSeries) {
                             $selectedPhotos[$series][] = $photo;
                             $usedPhotoIds[] = $photo->id;
                         }
                     }
-    
+
                     if (count($selectedPhotos[$series] ?? []) >= $photosPerSeries) {
                         break;
                     }
                 }
             }
         }
-    
+
         foreach ($selectedPhotos as $index => $series) {
             $selectedPhotos[$index] = array_slice($series, 0, $photosPerSeries);
         }
-    
+
         $photosByGroups = $selectedPhotos;
         // dd($photosByGroups);
         return view('simulations.step-two', [
@@ -258,7 +260,7 @@ class SimulationController extends Controller
             'simulation' => $simulation,
         ]);
     }
-    
+
     public function postStepTwo(Request $request, Simulation $simulation)
     {
         // dd(request()->all());
@@ -298,48 +300,48 @@ class SimulationController extends Controller
             return redirect()->route('simulation.create-step-two', compact('simulation'))
                 ->withErrors(['error' => 'Aucune photo sélectionnée pour l’étape 3.']);
         }
-    
+
         // 2) Charger les photos sélectionnées
         $selectedPhotos = Photo::whereIn('id', $selectedPhotoIds)->get();
-    
+
         // 3) Déterminer la marque dominante (comme étape 2)
         $makeCounts = $selectedPhotos->groupBy('make')->map->count();
         $dominantMake = $makeCounts->sortDesc()->keys()->first();
-    
+
         // 4) Déterminer la focale dominante (si c’est votre logique)
         $focalCounts = $selectedPhotos->groupBy('focal_length')->map->count();
         $dominantFocal = $focalCounts->sortDesc()->keys()->first();
-    
+
         // 5) Construire la requête des photos candidates
         //    - Filtrées par type de photo
         //    - Filtrées par la marque dominante
         //    - (Éventuellement) Filtrées par la focale dominante
         //    - Triées par 'aperture' (supposé existant en base)
         $photosQuery = Photo::whereHas('photoTypes', function ($query) use ($simulation) {
-                $query->where('photo_types.id', $simulation->photo_type_id);
-            })
+            $query->where('photo_types.id', $simulation->photo_type_id);
+        })
             ->where('make', $dominantMake)
             // ->where('focal_length', $dominantFocal) // <-- à activer si vous limitez à la focale dominante
             ->orderBy('aperture');
-    
+
         $photos = $photosQuery->get();
-    
+
         // 6) Créer 3 séries de 3 photos, sans réutiliser la même photo
         //    et en veillant à ce que, pour chaque série, l'ouverture soit unique.
         $maxSeries = 3;
         $photosPerSeries = 3;
         $selectedPhotosBySeries = [];
         $usedPhotoIds = [];  // pour n'utiliser qu'une fois chaque photo
-    
+
         for ($series = 0; $series < $maxSeries; $series++) {
             // Exclure les photos déjà utilisées TOUTES séries confondues
             $availablePhotos = $photos->reject(function ($photo) use ($usedPhotoIds) {
                 return in_array($photo->id, $usedPhotoIds);
             });
-    
+
             // On mémorise ici les ouvertures déjà choisies pour cette série
             $usedAperturesThisSeries = [];
-    
+
             // Remplir la série courante (max 3 photos) avec des ouvertures distinctes
             foreach ($availablePhotos as $photo) {
                 if (count($selectedPhotosBySeries[$series] ?? []) < $photosPerSeries) {
@@ -357,46 +359,105 @@ class SimulationController extends Controller
                 }
             }
         }
-    
+
         // 7) S’assurer que chaque série fasse max 3 photos (au cas où)
         foreach ($selectedPhotosBySeries as $seriesIndex => $photoSet) {
             $selectedPhotosBySeries[$seriesIndex] = array_slice($photoSet, 0, $photosPerSeries);
         }
-        dd($selectedPhotosBySeries);
+        // dd($selectedPhotosBySeries);
         // 8) Retourner la vue step-three
         return view('simulations.step-three', [
             'photosByGroups' => $selectedPhotosBySeries,
             'simulation'     => $simulation,
         ]);
     }
-    
-    public function postStepThree(Request $request, Simulation $simulation)
-{
-    $rules = [
-        'selectedPhotos' => 'required|array',
-        'selectedPhotos.*' => 'exists:photos,id',
-    ];
 
-    $validator = Validator::make($request->all(), $rules);
-    if ($validator->fails()) {
-        return Redirect::to('simulation/' . $simulation->uuid . '/step-three')
-            ->withErrors($validator);
+
+    public function postStepThree(Request $request, Simulation $simulation)
+    {
+        $rules = [
+            'selectedPhotos' => 'required|array',
+            'selectedPhotos.*' => 'exists:photos,id',
+        ];
+
+        $validator = Validator::make($request->all(), $rules);
+        if ($validator->fails()) {
+            return Redirect::to('simulation/' . $simulation->uuid . '/step-three')
+                ->withErrors($validator);
+        }
+
+        $selectedPhotos = Photo::whereIn('id', $request->input('selectedPhotos'))->get();
+        foreach ($selectedPhotos as $photo) {
+            SimulationPhoto::create([
+                'simulation_id' => $simulation->id,
+                'photo_id'      => $photo->id,
+                'step'          => 3,
+            ]);
+        }
+
+        session(['selectedPhotos' => $request->input('selectedPhotos')]);
+
+        return redirect()->route('simulation.create-final-step', compact('simulation'));
     }
 
-    $selectedPhotos = Photo::whereIn('id', $request->input('selectedPhotos'))->get();
-    foreach ($selectedPhotos as $photo) {
-        SimulationPhoto::create([
-            'simulation_id' => $simulation->id,
-            'photo_id'      => $photo->id,
-            'step'          => 3, // ou un autre indicateur
+    public function createFinalStep(Request $request, Simulation $simulation)
+    {
+        // 1) Récupérer les IDs des photos sélectionnées à l’étape 3 dans la session
+        $selectedPhotoIds = session('selectedPhotos', []);
+        if (empty($selectedPhotoIds)) {
+            return redirect()
+                ->route('simulation.create-step-three', compact('simulation'))
+                ->withErrors(['error' => 'Aucune photo sélectionnée pour l’étape finale.']);
+        }
+    
+        // 2) Charger ces photos en base
+        $selectedPhotos = Photo::whereIn('id', $selectedPhotoIds)->get();
+    
+        // 3) Déterminer la marque dominante
+        $makeCounts = $selectedPhotos->groupBy('make')->map->count();
+        $dominantMake = $makeCounts->sortDesc()->keys()->first();
+    
+        // 4) Calculer la plage de focales (min / max)
+        $minFocal = $selectedPhotos->min('focal_length');
+        $maxFocal = $selectedPhotos->max('focal_length');
+    
+        // 5) Calculer la plage d’ouvertures (min / max)
+        //    (Supposons que vous ayez un champ "aperture" dans la table photos)
+        $minAperture = $selectedPhotos->min('aperture');
+        $maxAperture = $selectedPhotos->max('aperture');
+    
+        // 6) Récupérer les boîtiers de la marque dominante
+        //    (on suppose que vous avez une table "cameras" avec un champ "make")
+        $cameras = Model::where('make', $dominantMake)->get();
+    
+        // 7) Récupérer les objectifs compatibles avec la plage focale et la plage d’ouverture
+        //    (on suppose que vous avez une table "lenses" avec min_focal_length, max_focal_length, etc.)
+        $lenses = Lens::where('make', $dominantMake)
+            ->where('min_focal_length', '<=', $minFocal)
+            ->where('max_focal_length', '>=', $maxFocal)
+            ->where('min_aperture', '<=', $minAperture)
+            ->where('max_aperture', '>=', $maxAperture)
+            ->get();
+    
+        // 8) Fabriquer 3 "packs" (pour l’exemple, on prend les 3 premiers couples camera/lens)
+        //    Vous pouvez aussi randomiser, ou appliquer une logique de prix, etc.
+        $packs = collect();
+        for ($i = 0; $i < 3; $i++) {
+            if (isset($cameras[$i]) && isset($lenses[$i])) {
+                $packs->push([
+                    'title'  => 'Pack essentiel',
+                    'camera' => $cameras[$i],
+                    'lens'   => $lenses[$i],
+                    'price'  => 25.99,  // ex. un prix fictif
+                ]);
+            }
+        }
+    
+        // 9) Retourner la vue "simulations.final-step" avec la liste des packs
+        return view('simulations.final-step', [
+            'simulation' => $simulation,
+            'packs'      => $packs,
         ]);
     }
-
-    // Stocker pour la suite
-    session(['selectedPhotos' => $request->input('selectedPhotos')]);
-
-    // Passer à l’étape suivante (ou un récap)…
-    return redirect()->route('simulation.final-step', compact('simulation'));
-}
-
+    
 }
