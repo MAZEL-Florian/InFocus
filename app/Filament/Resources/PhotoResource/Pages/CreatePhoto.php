@@ -37,6 +37,7 @@ class CreatePhoto extends CreateRecord
                 'exposure_time' => $metaData->get('EXIF.ExposureTime') ?? null,
                 'iso' => $metaData->get('EXIF.ISOSpeedRatings') ?? null,
                 'focal_length' => $metaData->get('EXIF.FocalLength') ?? null,
+                'aperture' => $metaData->get('COMPUTED.ApertureFNumber') ?? null,
                 'model_name' => $metaData->get('IFD0.Model') ?? null
             ]);
 

@@ -41,6 +41,7 @@ class PhotoResource extends Resource
                     ->label('Image')
                     ->multiple()
                     ->required()
+                    ->maxSize(40000)
                     ->directory('photos'),
                     Forms\Components\Select::make('photo_types')
                     ->label('Types de Photographie')
@@ -76,6 +77,9 @@ class PhotoResource extends Resource
                     ->sortable(),
                 Tables\Columns\TextColumn::make('focal_length')
                     ->label('Distance Focale')
+                    ->searchable(),
+                Tables\Columns\TextColumn::make('aperture')
+                    ->label('Ouverture')
                     ->searchable(),
                 Tables\Columns\TextColumn::make('created_at')
                     ->label('Date de création')
