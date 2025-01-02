@@ -423,20 +423,20 @@ class SimulationController extends Controller
     
         // 5) Calculer la plage d’ouvertures (min / max)
         //    (Supposons que vous ayez un champ "aperture" dans la table photos)
-        $minAperture = $selectedPhotos->min('aperture');
-        $maxAperture = $selectedPhotos->max('aperture');
-    
+        // $minAperture = $selectedPhotos->min('aperture');
+        // $maxAperture = $selectedPhotos->max('aperture');
+        // dd($selectedPhotos);
         // 6) Récupérer les boîtiers de la marque dominante
         //    (on suppose que vous avez une table "cameras" avec un champ "make")
-        $cameras = Model::where('make', $dominantMake)->get();
+        $cameras = Model::where('brand', $dominantMake)->get();
     
         // 7) Récupérer les objectifs compatibles avec la plage focale et la plage d’ouverture
         //    (on suppose que vous avez une table "lenses" avec min_focal_length, max_focal_length, etc.)
-        $lenses = Lens::where('make', $dominantMake)
-            ->where('min_focal_length', '<=', $minFocal)
+        $lenses = Lens::
+            where('min_focal_length', '<=', $minFocal)
             ->where('max_focal_length', '>=', $maxFocal)
-            ->where('min_aperture', '<=', $minAperture)
-            ->where('max_aperture', '>=', $maxAperture)
+            // ->where('min_aperture', '<=', $minAperture)
+            // ->where('max_aperture', '>=', $maxAperture)
             ->get();
     
         // 8) Fabriquer 3 "packs" (pour l’exemple, on prend les 3 premiers couples camera/lens)
