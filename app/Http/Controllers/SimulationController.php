@@ -406,8 +406,8 @@ class SimulationController extends Controller
         $selectedPhotoIdsStepOne   = session('selectedPhotosStepOne', []);
         $selectedPhotoIdsStepTwo   = session('selectedPhotosStepTwo', []);
         $selectedPhotoIdsStepThree = session('selectedPhotosStepThree', []);
-        // dd($selectedPhotoIdsStepTwo);
-        // 2) Vérifier qu'on a bien des sélections
+
+        // 2) Vérifier qu'on a bien des sélections pour chaque étape
         if (empty($selectedPhotoIdsStepOne)) {
             return redirect()
                 ->route('simulation.create-step-one', compact('simulation'))
@@ -430,103 +430,159 @@ class SimulationController extends Controller
         $photosStepThree = Photo::whereIn('id', $selectedPhotoIdsStepThree)->get();
 
         // ----------------------------------------------------
-        // 3a) Marque dominante depuis l'étape 1
+        // Étape 1 : Marque dominante (colorimétrie)
         // ----------------------------------------------------
-        $makeCounts = $photosStepOne->groupBy('make')->map->count();
+        $makeCounts   = $photosStepOne->groupBy('make')->map->count();
         $dominantMake = $makeCounts->sortDesc()->keys()->first();  // ex. "Canon"
 
         // ----------------------------------------------------
-        // 3b) Focale min / max depuis l'étape 2
+        // Étape 2 : Extraire jusqu’à 3 focales “dominantes”
         // ----------------------------------------------------
-        // Dans vos exemples, vous transformez "30/1" ou "200/1" => 30.0, 200.0
         $focalValuesStepTwo = $photosStepTwo->map(function ($photo) {
             if (strpos($photo->focal_length, '/') !== false) {
                 [$num, $den] = explode('/', $photo->focal_length);
-                return $num / $den;
+                return $num / $den; // ex. "30/1" => 30.0
             }
             return (float) $photo->focal_length;
         });
-        $focalCounts = $focalValuesStepTwo->countBy();
-        $focalCounts = $focalValuesStepTwo->countBy();
-        $topFocalValues = $focalCounts->sortDesc()->keys()->take(3);
-        // => ex. [10, 17, 300]
+        $focalCounts     = $focalValuesStepTwo->countBy(); 
+        $topFocalValues  = $focalCounts->sortDesc()->keys()->take(3); 
+        // ex. s’il y a 2 focales => on aura 2
+        
+        // S’il n’y a qu’une ou deux focales, on duplique 
+        // pour être sûr d’en avoir 3 (si possible)
+        while ($topFocalValues->count() < 3 && $topFocalValues->count() > 0) {
+            // Dupliquer la plus fréquente (qui est en premier)
+            $focalToDuplicate = $topFocalValues->first();
+            $topFocalValues->push($focalToDuplicate);
+        }
+        // ex. [10, 17, 300] si l’utilisateur a choisi 10, 17, 300
+        // dd($focalValuesStepTwo);
+        // ----------------------------------------------------
+        // Récupérer la liste des boîtiers "dominantMake"
+        // ----------------------------------------------------
+        // On en prend plus que 3, au cas où on manquerait. On pourra piocher dedans.
+        $cameras = Model::where('brand', $dominantMake)->take(10)->get();
 
-        // 2) Récupérer la liste des boîtiers
-        $cameras = Model::where('brand', $dominantMake)->take(3)->get();
-        // si vous voulez 3 boîtiers distincts, OK
-        // sinon, vous pouvez n’en prendre qu’un “meilleur” boîtier
-
-        // 3) Pour chaque focale, trouver un objectif (fonction helper)
+        // ----------------------------------------------------
+        // Générer 3 packs (1 par focale),
+        // en réutilisant le matos si on n’a pas assez de choix distincts
+        // ----------------------------------------------------
         $packs = collect();
-        $i = 0;
+        $cameraUsed    = []; // pour éviter la duplication inutile si on a assez de boîtiers
+        $lensUsed      = []; // idem pour les objectifs
 
-        foreach ($topFocalValues as $focal) {
-            if (! isset($cameras[$i])) {
-                // si vous n’avez pas 3 boîtiers, on réutilise le 1er ?
-                // $camera = $cameras->first();
-                // ou skip
-                break;
-            }
-            $camera = $cameras[$i];
+        $focaleIndex = 0; // On avance dans topFocalValues
+        $packCount   = 0; // Combien de packs créés
 
-            // Trouver l’objectif correspondant
-            $lens = $this->findLensForFocal($focal, $dominantMake);
-            $sharedMounts = $camera->mounts->intersect($lens->mounts);
-            // dd($sharedMounts);
-            if ($sharedMounts->isEmpty()) {
-                // Pas compatible => on saute ou on cherche un autre lens
-                continue;
+        while ($packCount < 3 && $focaleIndex < $topFocalValues->count()) {
+            $focal = $topFocalValues[$focaleIndex];
+
+            // Étape A) Chercher un boîtier (priorité à un boîtier qu’on n’a pas encore utilisé)
+            $camera = $this->pickCamera($cameras, $cameraUsed);
+            if (! $camera) {
+                // plus de boîtiers disponibles, on tente la réutilisation forcée
+                $camera = $cameras->first();
+                if (! $camera) {
+                    // Aucune caméra en base => impossible de poursuivre
+                    break;
+                }
             }
+
+            // Étape B) Chercher un objectif pour cette focale
+            $lens = $this->findLensForFocal($focal, $dominantMake, $lensUsed);
             if (! $lens) {
-                // fallback final: si on ne trouve rien, on saute
+                // Pas d’objectif => on skip cette focale
+                $focaleIndex++;
                 continue;
             }
 
-            // Calcul du prix
-            $totalPrice = (float) $camera->price + (float) $lens->price;
-            $monthly = round($totalPrice / 36, 2);
+            // Étape C) Vérifier la compatibilité monture
+            $sharedMounts = $camera->mounts->intersect($lens->mounts);
+            if ($sharedMounts->isEmpty()) {
+                // On peut essayer un autre objectif, ou un autre boîtier
+                // Pour garder un code simple, on skip la focale
+                $focaleIndex++;
+                continue;
+            }
 
-            $packTitle = match ($i) {
+            // Étape D) Calcul du prix (LOA 36 mois)
+            $totalPrice = (float) $camera->price + (float) $lens->price;
+            $monthly    = round($totalPrice / 36, 2);
+
+            // Choisir un titre
+            $packTitle = match ($packCount) {
                 0 => 'Pack Essentiel',
                 1 => 'Pack Recommandé',
                 2 => 'Pack Premium',
-                default => 'Pack #' . ($i + 1),
+                default => 'Pack #'.($packCount+1),
             };
 
+            // Enregistrer le pack
             $packs->push([
-                'title'  => $packTitle,
-                'camera' => $camera,
-                'lens'   => $lens,
-                'focalRequested' => $focal, // pour info
-                'price'  => $monthly,
+                'title'          => $packTitle,
+                'camera'         => $camera,
+                'lens'           => $lens,
+                'focalRequested' => $focal,
+                'price'          => $monthly,
             ]);
 
-            $i++;
+            // Marquer qu’on a utilisé ce boîtier / objectif
+            $cameraUsed[] = $camera->id;
+            $lensUsed[]   = $lens->id;
+
+            // Passer à la focale suivante
+            $focaleIndex++;
+            $packCount++;
         }
 
-        // => On aura 3 (ou moins) packs maximum
-        // => Chacun correspondant à une focale distincte
-
+        // Si, à l’issue, on a moins de 3 packs,
+        // on peut tenter d’en rajouter en piochant dans les focales suivantes (si >3 focales)
+        // ou en dupliquant des focales. Mais ici, on s’en tient à 3 max.
         return view('simulations.final-step', [
             'simulation' => $simulation,
             'packs'      => $packs,
         ]);
     }
-    private function findLensForFocal($focal, $dominantMake)
+    private function findLensForFocal(float $focal, string $dominantMake, array $lensUsed)
     {
-        // Tenter un objectif qui couvre le focal
-        $lens = Lens::where('brand', $dominantMake)
+        // 1) Tenter un objectif qui couvre exactement la focale
+        $candidate = Lens::where('brand', $dominantMake)
+            ->whereNotIn('id', $lensUsed)
             ->where('min_focal_length', '<=', $focal)
             ->where('max_focal_length', '>=', $focal)
             ->first();
-
-        if ($lens) {
-            return $lens;
+        if ($candidate) {
+            return $candidate;
         }
 
-        // fallback => tri "le plus proche"
-        return Lens::where('brand', $dominantMake)
+        // 2) Fallback => tri "le plus proche"
+        //    On exclut aussi ceux déjà utilisés.
+        $candidate = Lens::where('brand', $dominantMake)
+            ->whereNotIn('id', $lensUsed)
             ->orderByRaw("ABS((min_focal_length + max_focal_length)/2 - ?)", [$focal])
             ->first();
+
+        return $candidate;
+    }
+
+    /**
+     * Sélectionne un boîtier "neuf" (non utilisé) si possible,
+     * sinon, si on n’en a plus de dispo, on autorise la réutilisation.
+     */
+    private function pickCamera($cameras, array $cameraUsed)
+    {
+        // 1) Tenter un boîtier pas encore utilisé
+        $newOne = $cameras->first(function ($cam) use ($cameraUsed) {
+            return ! in_array($cam->id, $cameraUsed);
+        });
+
+        if ($newOne) {
+            return $newOne;
+        }
+
+        // 2) Pas de boîtier neuf ? alors on renvoie null,
+        //    le code appelant pourra décider de piocher autrement
+        return null;
     }
 }
