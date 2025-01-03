@@ -23,7 +23,7 @@ class CreatePhoto extends CreateRecord
 
         foreach ($data['image_url'] as $imagePath) {
             $img = Image::read('storage/' . $imagePath);
-            dd($img, $img->exif());
+            // dd($img, $img->exif());
 
             $pathInfo = pathinfo($imagePath);
             $webpPath = $pathInfo['dirname'] . '/' . $pathInfo['filename'] . '.webp';

@@ -164,7 +164,7 @@ class SimulationController extends Controller
         }
 
         // Transmettre les IDs des photos sélectionnées via la session
-        session(['selectedPhotos' => $request->input('selectedPhotos')]);
+        session(['selectedPhotosStepOne' => $request->input('selectedPhotos')]);
 
         return redirect()->route('simulation.create-step-two', compact('simulation'));
     }
@@ -172,7 +172,7 @@ class SimulationController extends Controller
 
     public function createStepTwo(Request $request, Simulation $simulation)
     {
-        $selectedPhotoIds = session('selectedPhotos', []);
+        $selectedPhotoIds = session('selectedPhotosStepOne', []);
 
         if (empty($selectedPhotoIds)) {
             return redirect()->route('simulation.create-step-one', compact('simulation'))
@@ -286,7 +286,7 @@ class SimulationController extends Controller
         }
 
         // Transmettre les IDs des photos sélectionnées via la session
-        session(['selectedPhotos' => $request->input('selectedPhotos')]);
+        session(['selectedPhotosStepTwo' => $request->input('selectedPhotos')]);
         // dd(session());
         return redirect()->route('simulation.create-step-three', compact('simulation'));
     }
@@ -295,7 +295,7 @@ class SimulationController extends Controller
     public function createStepThree(Request $request, Simulation $simulation)
     {
         // 1) Récupérer les IDs des photos sélectionnées à l’étape 2
-        $selectedPhotoIds = session('selectedPhotos', []);
+        $selectedPhotoIds = session('selectedPhotosStepTwo', []);
         if (empty($selectedPhotoIds)) {
             return redirect()->route('simulation.create-step-two', compact('simulation'))
                 ->withErrors(['error' => 'Aucune photo sélectionnée pour l’étape 3.']);
@@ -364,7 +364,7 @@ class SimulationController extends Controller
         foreach ($selectedPhotosBySeries as $seriesIndex => $photoSet) {
             $selectedPhotosBySeries[$seriesIndex] = array_slice($photoSet, 0, $photosPerSeries);
         }
-        // dd($selectedPhotosBySeries);
+        dd($selectedPhotosBySeries);
         // 8) Retourner la vue step-three
         return view('simulations.step-three', [
             'photosByGroups' => $selectedPhotosBySeries,
@@ -395,7 +395,7 @@ class SimulationController extends Controller
             ]);
         }
 
-        session(['selectedPhotos' => $request->input('selectedPhotos')]);
+        session(['selectedPhotosStepThree' => $request->input('selectedPhotos')]);
 
         return redirect()->route('simulation.create-final-step', compact('simulation'));
     }
@@ -403,7 +403,8 @@ class SimulationController extends Controller
     public function createFinalStep(Request $request, Simulation $simulation)
     {
         // 1) Récupérer les IDs des photos sélectionnées à l’étape 3 dans la session
-        $selectedPhotoIds = session('selectedPhotos', []);
+        $selectedPhotoIds = session('selectedPhotosStepThree', []);
+        // dd(session());
         if (empty($selectedPhotoIds)) {
             return redirect()
                 ->route('simulation.create-step-three', compact('simulation'))
@@ -412,52 +413,63 @@ class SimulationController extends Controller
     
         // 2) Charger ces photos en base
         $selectedPhotos = Photo::whereIn('id', $selectedPhotoIds)->get();
-    
+        
         // 3) Déterminer la marque dominante
         $makeCounts = $selectedPhotos->groupBy('make')->map->count();
         $dominantMake = $makeCounts->sortDesc()->keys()->first();
     
         // 4) Calculer la plage de focales (min / max)
-        $minFocal = $selectedPhotos->min('focal_length');
-        $maxFocal = $selectedPhotos->max('focal_length');
+        $minFocal = $selectedPhotos->map(function ($photo) {
+            if (strpos($photo->focal_length, '/') !== false) {
+                [$num, $den] = explode('/', $photo->focal_length);
+                return $num / $den;
+            }
+            return (float) $photo->focal_length;
+        })->min();
     
-        // 5) Calculer la plage d’ouvertures (min / max)
-        //    (Supposons que vous ayez un champ "aperture" dans la table photos)
-        // $minAperture = $selectedPhotos->min('aperture');
-        // $maxAperture = $selectedPhotos->max('aperture');
-        // dd($selectedPhotos);
-        // 6) Récupérer les boîtiers de la marque dominante
-        //    (on suppose que vous avez une table "cameras" avec un champ "make")
+        $maxFocal = $selectedPhotos->map(function ($photo) {
+            if (strpos($photo->focal_length, '/') !== false) {
+                [$num, $den] = explode('/', $photo->focal_length);
+                return $num / $den;
+            }
+            return (float) $photo->focal_length;
+        })->max();
+    
+        // 5) Récupérer les boîtiers de la marque dominante
         $cameras = Model::where('brand', $dominantMake)->get();
     
-        // 7) Récupérer les objectifs compatibles avec la plage focale et la plage d’ouverture
-        //    (on suppose que vous avez une table "lenses" avec min_focal_length, max_focal_length, etc.)
-        $lenses = Lens::
-            where('min_focal_length', '<=', $minFocal)
+        // 6) Récupérer les objectifs compatibles (plage focale + brand)
+        $lenses = Lens::where('brand', $dominantMake)
+            ->where('min_focal_length', '<=', $minFocal)
             ->where('max_focal_length', '>=', $maxFocal)
-            // ->where('min_aperture', '<=', $minAperture)
-            // ->where('max_aperture', '>=', $maxAperture)
             ->get();
     
-        // 8) Fabriquer 3 "packs" (pour l’exemple, on prend les 3 premiers couples camera/lens)
-        //    Vous pouvez aussi randomiser, ou appliquer une logique de prix, etc.
+        // 7) Fabriquer 3 "packs" en prenant, par exemple, les 3 premiers couples camera/lens
         $packs = collect();
         for ($i = 0; $i < 3; $i++) {
             if (isset($cameras[$i]) && isset($lenses[$i])) {
+                $cameraPrice = $cameras[$i]->price; // TTC
+                $lensPrice   = $lenses[$i]->price;  // TTC
+                $totalPrice  = $cameraPrice + $lensPrice; // TTC total
+    
+                // Calcule le prix mensuel pour 36 mois (3 ans)
+                $monthlyLOA = $totalPrice / 36;
+    
                 $packs->push([
                     'title'  => 'Pack essentiel',
                     'camera' => $cameras[$i],
                     'lens'   => $lenses[$i],
-                    'price'  => 25.99,  // ex. un prix fictif
+                    'price'  => round($monthlyLOA, 2),  // Prix mensuel LOA
                 ]);
             }
         }
     
-        // 9) Retourner la vue "simulations.final-step" avec la liste des packs
+        // 8) Retourner la vue "simulations.final-step" avec la liste des packs
         return view('simulations.final-step', [
             'simulation' => $simulation,
             'packs'      => $packs,
         ]);
     }
+    
     
 }

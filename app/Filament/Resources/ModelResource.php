@@ -41,24 +41,8 @@ class ModelResource extends Resource
                     ->label('Image')
                     ->image()
                     ->required(),
-                Forms\Components\TextInput::make('camera_model')
-                    ->label('Modèle')
-                    ->required()
-                    ->maxLength(255),
-                Forms\Components\TextInput::make('aperture')
-                    ->label('Ouverture')
-                    ->required()
-                    ->maxLength(255),
-                Forms\Components\TextInput::make('shutter_speed')
-                    ->label('Vitesse d\'obturation')
-                    ->required()
-                    ->maxLength(255),
-                Forms\Components\TextInput::make('iso')
-                    ->label('ISO')
-                    ->required()
-                    ->numeric(),
-                Forms\Components\TextInput::make('focal_length')
-                    ->label('Distance Focale')
+                Forms\Components\TextInput::make('brand')
+                    ->label('Marque')
                     ->required()
                     ->maxLength(255),
                 Forms\Components\TextInput::make('price_wot')
@@ -78,28 +62,21 @@ class ModelResource extends Resource
     {
         return $table
             ->columns([
-                Tables\Columns\TextColumn::make('uuid')
-                    ->label('UUID')
-                    ->searchable(),
                 Tables\Columns\TextColumn::make('name')
+                    ->label('Nom')
                     ->searchable(),
-                Tables\Columns\ImageColumn::make('image_url'),
-                Tables\Columns\TextColumn::make('camera_model')
-                    ->searchable(),
-                Tables\Columns\TextColumn::make('aperture')
-                    ->searchable(),
-                Tables\Columns\TextColumn::make('shutter_speed')
-                    ->searchable(),
-                Tables\Columns\TextColumn::make('iso')
-                    ->numeric()
-                    ->sortable(),
-                Tables\Columns\TextColumn::make('focal_length')
+                Tables\Columns\ImageColumn::make('image_url')
+                    ->label('Image'),
+                Tables\Columns\TextColumn::make('brand')
+                    ->label('Marque')
                     ->searchable(),
                 Tables\Columns\TextColumn::make('price_wot')
-                    ->numeric()
+                    ->label('Prix HT')
+                    ->money('EUR')
                     ->sortable(),
                 Tables\Columns\TextColumn::make('price')
-                    ->money()
+                    ->label('Prix')
+                    ->money('EUR')
                     ->sortable(),
                 Tables\Columns\TextColumn::make('created_at')
                     ->dateTime()
