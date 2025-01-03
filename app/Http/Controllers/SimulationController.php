@@ -325,7 +325,7 @@ class SimulationController extends Controller
             ->orderBy('aperture');
 
         $photos = $photosQuery->get();
-
+        // dd($photos);
         // 6) Créer 3 séries de 3 photos, sans réutiliser la même photo
         //    et en veillant à ce que, pour chaque série, l'ouverture soit unique.
         $maxSeries = 3;
@@ -364,7 +364,7 @@ class SimulationController extends Controller
         foreach ($selectedPhotosBySeries as $seriesIndex => $photoSet) {
             $selectedPhotosBySeries[$seriesIndex] = array_slice($photoSet, 0, $photosPerSeries);
         }
-        dd($selectedPhotosBySeries);
+        // dd($selectedPhotosBySeries);
         // 8) Retourner la vue step-three
         return view('simulations.step-three', [
             'photosByGroups' => $selectedPhotosBySeries,
@@ -402,74 +402,131 @@ class SimulationController extends Controller
 
     public function createFinalStep(Request $request, Simulation $simulation)
     {
-        // 1) Récupérer les IDs des photos sélectionnées à l’étape 3 dans la session
-        $selectedPhotoIds = session('selectedPhotosStepThree', []);
-        // dd(session());
-        if (empty($selectedPhotoIds)) {
+        // 1) Récupération des IDs de chaque étape
+        $selectedPhotoIdsStepOne   = session('selectedPhotosStepOne', []);
+        $selectedPhotoIdsStepTwo   = session('selectedPhotosStepTwo', []);
+        $selectedPhotoIdsStepThree = session('selectedPhotosStepThree', []);
+        // dd($selectedPhotoIdsStepTwo);
+        // 2) Vérifier qu'on a bien des sélections
+        if (empty($selectedPhotoIdsStepOne)) {
+            return redirect()
+                ->route('simulation.create-step-one', compact('simulation'))
+                ->withErrors(['error' => 'Aucune photo (étape 1).']);
+        }
+        if (empty($selectedPhotoIdsStepTwo)) {
+            return redirect()
+                ->route('simulation.create-step-two', compact('simulation'))
+                ->withErrors(['error' => 'Aucune photo (étape 2).']);
+        }
+        if (empty($selectedPhotoIdsStepThree)) {
             return redirect()
                 ->route('simulation.create-step-three', compact('simulation'))
-                ->withErrors(['error' => 'Aucune photo sélectionnée pour l’étape finale.']);
+                ->withErrors(['error' => 'Aucune photo (étape 3).']);
         }
-    
-        // 2) Charger ces photos en base
-        $selectedPhotos = Photo::whereIn('id', $selectedPhotoIds)->get();
-        
-        // 3) Déterminer la marque dominante
-        $makeCounts = $selectedPhotos->groupBy('make')->map->count();
-        $dominantMake = $makeCounts->sortDesc()->keys()->first();
-    
-        // 4) Calculer la plage de focales (min / max)
-        $minFocal = $selectedPhotos->map(function ($photo) {
+
+        // 3) Charger les photos de chaque étape
+        $photosStepOne   = Photo::whereIn('id', $selectedPhotoIdsStepOne)->get();
+        $photosStepTwo   = Photo::whereIn('id', $selectedPhotoIdsStepTwo)->get();
+        $photosStepThree = Photo::whereIn('id', $selectedPhotoIdsStepThree)->get();
+
+        // ----------------------------------------------------
+        // 3a) Marque dominante depuis l'étape 1
+        // ----------------------------------------------------
+        $makeCounts = $photosStepOne->groupBy('make')->map->count();
+        $dominantMake = $makeCounts->sortDesc()->keys()->first();  // ex. "Canon"
+
+        // ----------------------------------------------------
+        // 3b) Focale min / max depuis l'étape 2
+        // ----------------------------------------------------
+        // Dans vos exemples, vous transformez "30/1" ou "200/1" => 30.0, 200.0
+        $focalValuesStepTwo = $photosStepTwo->map(function ($photo) {
             if (strpos($photo->focal_length, '/') !== false) {
                 [$num, $den] = explode('/', $photo->focal_length);
                 return $num / $den;
             }
             return (float) $photo->focal_length;
-        })->min();
-    
-        $maxFocal = $selectedPhotos->map(function ($photo) {
-            if (strpos($photo->focal_length, '/') !== false) {
-                [$num, $den] = explode('/', $photo->focal_length);
-                return $num / $den;
-            }
-            return (float) $photo->focal_length;
-        })->max();
-    
-        // 5) Récupérer les boîtiers de la marque dominante
-        $cameras = Model::where('brand', $dominantMake)->get();
-    
-        // 6) Récupérer les objectifs compatibles (plage focale + brand)
-        $lenses = Lens::where('brand', $dominantMake)
-            ->where('min_focal_length', '<=', $minFocal)
-            ->where('max_focal_length', '>=', $maxFocal)
-            ->get();
-    
-        // 7) Fabriquer 3 "packs" en prenant, par exemple, les 3 premiers couples camera/lens
+        });
+        $focalCounts = $focalValuesStepTwo->countBy();
+        $focalCounts = $focalValuesStepTwo->countBy();
+        $topFocalValues = $focalCounts->sortDesc()->keys()->take(3);
+        // => ex. [10, 17, 300]
+
+        // 2) Récupérer la liste des boîtiers
+        $cameras = Model::where('brand', $dominantMake)->take(3)->get();
+        // si vous voulez 3 boîtiers distincts, OK
+        // sinon, vous pouvez n’en prendre qu’un “meilleur” boîtier
+
+        // 3) Pour chaque focale, trouver un objectif (fonction helper)
         $packs = collect();
-        for ($i = 0; $i < 3; $i++) {
-            if (isset($cameras[$i]) && isset($lenses[$i])) {
-                $cameraPrice = $cameras[$i]->price; // TTC
-                $lensPrice   = $lenses[$i]->price;  // TTC
-                $totalPrice  = $cameraPrice + $lensPrice; // TTC total
-    
-                // Calcule le prix mensuel pour 36 mois (3 ans)
-                $monthlyLOA = $totalPrice / 36;
-    
-                $packs->push([
-                    'title'  => 'Pack essentiel',
-                    'camera' => $cameras[$i],
-                    'lens'   => $lenses[$i],
-                    'price'  => round($monthlyLOA, 2),  // Prix mensuel LOA
-                ]);
+        $i = 0;
+
+        foreach ($topFocalValues as $focal) {
+            if (! isset($cameras[$i])) {
+                // si vous n’avez pas 3 boîtiers, on réutilise le 1er ?
+                // $camera = $cameras->first();
+                // ou skip
+                break;
             }
+            $camera = $cameras[$i];
+
+            // Trouver l’objectif correspondant
+            $lens = $this->findLensForFocal($focal, $dominantMake);
+            $sharedMounts = $camera->mounts->intersect($lens->mounts);
+            // dd($sharedMounts);
+            if ($sharedMounts->isEmpty()) {
+                // Pas compatible => on saute ou on cherche un autre lens
+                continue;
+            }
+            if (! $lens) {
+                // fallback final: si on ne trouve rien, on saute
+                continue;
+            }
+
+            // Calcul du prix
+            $totalPrice = (float) $camera->price + (float) $lens->price;
+            $monthly = round($totalPrice / 36, 2);
+
+            $packTitle = match ($i) {
+                0 => 'Pack Essentiel',
+                1 => 'Pack Recommandé',
+                2 => 'Pack Premium',
+                default => 'Pack #' . ($i + 1),
+            };
+
+            $packs->push([
+                'title'  => $packTitle,
+                'camera' => $camera,
+                'lens'   => $lens,
+                'focalRequested' => $focal, // pour info
+                'price'  => $monthly,
+            ]);
+
+            $i++;
         }
-    
-        // 8) Retourner la vue "simulations.final-step" avec la liste des packs
+
+        // => On aura 3 (ou moins) packs maximum
+        // => Chacun correspondant à une focale distincte
+
         return view('simulations.final-step', [
             'simulation' => $simulation,
             'packs'      => $packs,
         ]);
     }
-    
-    
+    private function findLensForFocal($focal, $dominantMake)
+    {
+        // Tenter un objectif qui couvre le focal
+        $lens = Lens::where('brand', $dominantMake)
+            ->where('min_focal_length', '<=', $focal)
+            ->where('max_focal_length', '>=', $focal)
+            ->first();
+
+        if ($lens) {
+            return $lens;
+        }
+
+        // fallback => tri "le plus proche"
+        return Lens::where('brand', $dominantMake)
+            ->orderByRaw("ABS((min_focal_length + max_focal_length)/2 - ?)", [$focal])
+            ->first();
+    }
 }
