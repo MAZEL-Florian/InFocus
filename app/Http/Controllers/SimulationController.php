@@ -451,14 +451,8 @@ class SimulationController extends Controller
             $totalPrice = (float)$packCamera->price + (float)$packLens->price;
             $monthly   = round($totalPrice / 36, 2);
 
-            $packTitle = match ($i) {
-                0 => 'Pack Essentiel',
-                1 => 'Pack Recommandé',
-                2 => 'Pack Premium',
-                default => 'Pack #' . ($i + 1),
-            };
             $packs->push([
-                'title' => $packTitle,
+                'title' => 'temp',
                 'camera' => $packCamera,
                 'lens' => $packLens,
                 'focalRequested' => $focal,
@@ -466,7 +460,19 @@ class SimulationController extends Controller
                 'price' => $monthly,
             ]);
         }
+        $packs = $packs->sortBy('price')->values();
 
+        $packs = $packs->map(function ($pack, $index) {
+            $newTitle = match ($index) {
+                0 => 'Pack Essentiel',
+                1 => 'Pack Recommandé',
+                2 => 'Pack Premium',
+                default => 'Pack #'.($index+1),
+            };
+            $pack['title'] = $newTitle;
+        
+            return $pack;
+        });
         return view('simulations.final-step', [
             'simulation' => $simulation,
             'packs' => $packs,
