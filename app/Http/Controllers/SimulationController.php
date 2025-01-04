@@ -9,102 +9,43 @@ use App\Models\PhotoType;
 use App\Models\Simulation;
 use App\Models\SimulationPhoto;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Redirect;
 use Illuminate\Support\Facades\Validator;
-use Symfony\Component\Console\Input\Input;
 
 class SimulationController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     */
+
     public function index()
     {
         return view('simulations.index');
     }
 
-    /**
-     * Show the form for creating a new resource.
-     */
-    public function create()
+    public function photoType()
     {
-        //
+        $photoTypes = PhotoType::all();
+        return view('simulations.photoType', compact('photoTypes'));
     }
 
-    /**
-     * Store a newly created resource in storage.
-     */
     public function store(Request $request)
     {
-        $rules = array(
-            'photo_type_id' => 'required'
-        );
+        $rules = ['photo_type_id' => 'required'];
         $validator = Validator::make($request->all(), $rules);
         if ($validator->fails()) {
             return Redirect::to('simulation/photoType')
                 ->withErrors($validator);
         }
+
         $simulation = new Simulation;
         $simulation->photo_type_id = $request->photo_type_id;
-        $simulation->user_id = Auth::user()->id;
+        $simulation->user_id       = auth()->id();
         $simulation->save();
-        // $photoType = PhotoType::select('name')
-        //     ->where('id', '=', $request->photo_type_id)->get();
-
 
         return redirect()->route('simulation.create-step-one', ['simulation' => $simulation]);
-        // return view('simulations.step-one', compact('simulation'));
     }
 
-    /**
-     * Display the specified resource.
-     */
-    public function show(string $id)
-    {
-        //
-    }
-
-    /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit(string $id)
-    {
-        //
-    }
-
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(Request $request, string $id)
-    {
-        //
-    }
-
-    /**
-     * Remove the specified resource from storage.
-     */
-    public function destroy(string $id)
-    {
-        //
-    }
-
-    public function photoType()
-    {
-
-        $photoTypes = PhotoType::all();
-
-        return view('simulations.photoType', compact('photoTypes'));
-    }
-
-    public function photos()
-    {
-
-        $photoTypes = PhotoType::all();
-
-        return view('simulations.photoType', compact('photoTypes'));
-    }
-
+    // --------------------------------------------------------
+    // Étape 1 : Colorimétrie
+    // --------------------------------------------------------
     public function createStepOne(Request $request, Simulation $simulation)
     {
         $photos = Photo::select('photos.*')
@@ -113,40 +54,42 @@ class SimulationController extends Controller
             ->where('photo_types.id', '=', $simulation->photo_type_id)
             ->get()
             ->groupBy('make');
+
+        foreach ($photos as $make => $collection) {
+            $photos[$make] = $collection->shuffle();
+        }
+
         $selectedPhotos = [];
-        $maxSeries = 3; // Nombre de séries
-        $photosPerSeries = 3; // Nombre de photos par série
+        $maxSeries      = 3;
+        $photosPerSeries = 3;
 
         for ($series = 0; $series < $maxSeries; $series++) {
             foreach ($photos as $make => $photoGroup) {
-                $photoIndex = $series; // Une photo différente par série
+                $photoIndex = $series;
                 if (isset($photoGroup[$photoIndex])) {
                     $selectedPhotos[$series][] = $photoGroup[$photoIndex];
                 }
             }
         }
 
-        // Réorganiser pour s'assurer que chaque série contient exactement 3 photos
         foreach ($selectedPhotos as $index => $series) {
             $selectedPhotos[$index] = array_slice($series, 0, $photosPerSeries);
         }
-        $photoType = $simulation->photoType;
 
+        $photoType = $simulation->photoType;
         return view('simulations.step-one', [
             'photosByGroups' => $selectedPhotos,
-            'simulation' => $simulation,
-            'photoType' => $photoType,
+            'simulation'     => $simulation,
+            'photoType'      => $photoType,
         ]);
     }
-
 
     public function postStepOne(Request $request, Simulation $simulation)
     {
         $rules = [
-            'selectedPhotos' => 'required|array',
+            'selectedPhotos'   => 'required|array',
             'selectedPhotos.*' => 'exists:photos,id',
         ];
-
         $validator = Validator::make($request->all(), $rules);
         if ($validator->fails()) {
             return Redirect::to('simulation/' . $simulation->uuid . '/step-one')
@@ -154,232 +97,211 @@ class SimulationController extends Controller
         }
 
         $selectedPhotos = Photo::whereIn('id', $request->input('selectedPhotos'))->get();
-
         foreach ($selectedPhotos as $photo) {
             SimulationPhoto::create([
                 'simulation_id' => $simulation->id,
-                'photo_id' => $photo->id,
-                'step' => 1
+                'photo_id'      => $photo->id,
+                'step'          => 1,
             ]);
         }
-
-        // Transmettre les IDs des photos sélectionnées via la session
-        session(['selectedPhotosStepOne' => $request->input('selectedPhotos')]);
+        if (! $simulation->dominant_make) {
+            $dominantMake = $this->findDominantMake($selectedPhotos);
+            if ($dominantMake) {
+                $simulation->dominant_make = $dominantMake;
+                $simulation->save();
+            }
+        }
 
         return redirect()->route('simulation.create-step-two', compact('simulation'));
     }
 
-
+    // --------------------------------------------------------
+    // Étape 2 : Focale (+ éventuellement marque si déterminée)
+    // --------------------------------------------------------
     public function createStepTwo(Request $request, Simulation $simulation)
     {
-        $selectedPhotoIds = session('selectedPhotosStepOne', []);
 
-        if (empty($selectedPhotoIds)) {
-            return redirect()->route('simulation.create-step-one', compact('simulation'))
-                ->withErrors(['error' => 'Aucune photo sélectionnée.']);
-        }
+        $dominantMake = $simulation->dominant_make;
 
-        $selectedPhotos = Photo::whereIn('id', $selectedPhotoIds)->get();
-
-        $makeCounts = $selectedPhotos->groupBy('make')->map->count();
-
-        $dominantMake = $makeCounts->sortDesc()->keys()->first();
-
-        $photos = collect();
-
-        if ($makeCounts->count() === 1 || $makeCounts[$dominantMake] > 1) {
+        if ($dominantMake) {
             $photos = Photo::where('make', $dominantMake)
-                ->whereHas('photoTypes', function ($query) use ($simulation) {
-                    $query->where('photo_types.id', $simulation->photo_type_id);
+                ->whereHas('photoTypes', function ($q) use ($simulation) {
+                    $q->where('photo_types.id', $simulation->photo_type_id);
                 })
                 ->orderBy('focal_length')
-                ->get();
-        } else {
-            $photos = Photo::whereHas('photoTypes', function ($query) use ($simulation) {
-                $query->where('photo_types.id', $simulation->photo_type_id);
-            })
-                ->orderBy('focal_length')
-                ->get();
-        }
+                ->get()
+                ->shuffle();
 
-        $selectedPhotos = [];
-        $maxSeries = 3;
-        $photosPerSeries = 3;
-        $usedPhotoIds = [];
+            $maxSeries      = 3;
+            $photosPerSeries = 3;
+            $selectedPhotos = [];
+            $usedPhotoIds   = [];
 
-        if ($makeCounts->count() === 1 || $makeCounts[$dominantMake] > 1) {
             for ($series = 0; $series < $maxSeries; $series++) {
-                $availablePhotos = $photos->reject(function ($photo) use ($usedPhotoIds) {
-                    return in_array($photo->id, $usedPhotoIds);
-                });
-
-                foreach ($availablePhotos as $photo) {
+                $available = $photos->reject(fn($p) => in_array($p->id, $usedPhotoIds));
+                foreach ($available as $photo) {
                     if (count($selectedPhotos[$series] ?? []) < $photosPerSeries) {
                         $selectedPhotos[$series][] = $photo;
                         $usedPhotoIds[] = $photo->id;
                     }
-
-                    if (count($selectedPhotos[$series] ?? []) >= $photosPerSeries) {
-                        break;
-                    }
                 }
             }
+
+            return view('simulations.step-two', [
+                'photosByGroups' => $selectedPhotos,
+                'simulation'     => $simulation,
+            ]);
         } else {
-            $photosByMake = $photos->groupBy('make');
+            $photos = Photo::whereHas('photoTypes', function ($q) use ($simulation) {
+                $q->where('photo_types.id', $simulation->photo_type_id);
+            })
+                ->orderBy('focal_length')
+                ->get();
+
+            $grouped = $photos->groupBy('make');
+            foreach ($grouped as $make => $col) {
+                $grouped[$make] = $col->shuffle();
+            }
+
+            $selectedPhotos = [];
+            $maxSeries      = 3;
+            $photosPerSeries = 3;
 
             for ($series = 0; $series < $maxSeries; $series++) {
-                foreach ($makeCounts->sortDesc()->keys() as $make) {
-                    $availablePhotos = $photosByMake[$make]->reject(function ($photo) use ($usedPhotoIds) {
-                        return in_array($photo->id, $usedPhotoIds);
-                    });
-
-                    if ($availablePhotos->isNotEmpty()) {
-                        $photo = $availablePhotos->first();
-
-                        if (count($selectedPhotos[$series] ?? []) < $photosPerSeries) {
-                            $selectedPhotos[$series][] = $photo;
-                            $usedPhotoIds[] = $photo->id;
-                        }
-                    }
-
-                    if (count($selectedPhotos[$series] ?? []) >= $photosPerSeries) {
-                        break;
+                foreach ($grouped as $make => $photoGroup) {
+                    $photoIndex = $series;
+                    if (isset($photoGroup[$photoIndex])) {
+                        $selectedPhotos[$series][] = $photoGroup[$photoIndex];
                     }
                 }
             }
-        }
 
-        foreach ($selectedPhotos as $index => $series) {
-            $selectedPhotos[$index] = array_slice($series, 0, $photosPerSeries);
+            return view('simulations.step-two', [
+                'photosByGroups' => $selectedPhotos,
+                'simulation'     => $simulation,
+            ]);
         }
-
-        $photosByGroups = $selectedPhotos;
-        // dd($photosByGroups);
-        return view('simulations.step-two', [
-            'photosByGroups' => $photosByGroups,
-            'simulation' => $simulation,
-        ]);
     }
 
     public function postStepTwo(Request $request, Simulation $simulation)
     {
-        // dd(request()->all());
         $rules = [
-            'selectedPhotos' => 'required|array',
+            'selectedPhotos'   => 'required|array',
             'selectedPhotos.*' => 'exists:photos,id',
         ];
-
         $validator = Validator::make($request->all(), $rules);
         if ($validator->fails()) {
-            return Redirect::to('simulation/' . $simulation->uuid . '/step-one')
+            return Redirect::to('simulation/' . $simulation->uuid . '/step-two')
                 ->withErrors($validator);
         }
 
         $selectedPhotos = Photo::whereIn('id', $request->input('selectedPhotos'))->get();
-        // dd($selectedPhotos);
         foreach ($selectedPhotos as $photo) {
             SimulationPhoto::create([
                 'simulation_id' => $simulation->id,
-                'photo_id' => $photo->id,
-                'step' => 2
+                'photo_id'      => $photo->id,
+                'step'          => 2,
             ]);
         }
 
-        // Transmettre les IDs des photos sélectionnées via la session
-        session(['selectedPhotosStepTwo' => $request->input('selectedPhotos')]);
-        // dd(session());
+        if (! $simulation->dominant_make) {
+            $photosStepOne = $this->getPhotosForStep($simulation, 1);
+            $allPhotos = $photosStepOne->merge($selectedPhotos);
+            $dominantMake = $this->findDominantMake($allPhotos);
+            if ($dominantMake) {
+                $simulation->dominant_make = $dominantMake;
+                $simulation->save();
+            }
+        }
+
         return redirect()->route('simulation.create-step-three', compact('simulation'));
     }
 
-
+    // --------------------------------------------------------
+    // Étape 3 : Ouverture
+    // --------------------------------------------------------
     public function createStepThree(Request $request, Simulation $simulation)
     {
-        // 1) Récupérer les IDs des photos sélectionnées à l’étape 2
-        $selectedPhotoIds = session('selectedPhotosStepTwo', []);
-        if (empty($selectedPhotoIds)) {
+        $photosStepTwo = $this->getPhotosForStep($simulation, 2);
+        if ($photosStepTwo->isEmpty()) {
             return redirect()->route('simulation.create-step-two', compact('simulation'))
                 ->withErrors(['error' => 'Aucune photo sélectionnée pour l’étape 3.']);
         }
 
-        // 2) Charger les photos sélectionnées
-        $selectedPhotos = Photo::whereIn('id', $selectedPhotoIds)->get();
+        $photosStepOne = $this->getPhotosForStep($simulation, 1);
+        $allPhotos     = $photosStepOne->merge($photosStepTwo);
+        $dominantMake  = $this->findDominantMake($allPhotos);
+        if ($dominantMake) {
+            $photos = Photo::whereHas('photoTypes', function ($q) use ($simulation) {
+                $q->where('photo_types.id', $simulation->photo_type_id);
+            })
+                ->where('make', $dominantMake)
+                ->orderBy('aperture')
+                ->get()
+                ->shuffle();
 
-        // 3) Déterminer la marque dominante (comme étape 2)
-        $makeCounts = $selectedPhotos->groupBy('make')->map->count();
-        $dominantMake = $makeCounts->sortDesc()->keys()->first();
+            $maxSeries = 3;
+            $photosPerSeries = 3;
+            $selectedPhotosBySeries = [];
+            $usedPhotoIds = [];
 
-        // 4) Déterminer la focale dominante (si c’est votre logique)
-        $focalCounts = $selectedPhotos->groupBy('focal_length')->map->count();
-        $dominantFocal = $focalCounts->sortDesc()->keys()->first();
-
-        // 5) Construire la requête des photos candidates
-        //    - Filtrées par type de photo
-        //    - Filtrées par la marque dominante
-        //    - (Éventuellement) Filtrées par la focale dominante
-        //    - Triées par 'aperture' (supposé existant en base)
-        $photosQuery = Photo::whereHas('photoTypes', function ($query) use ($simulation) {
-            $query->where('photo_types.id', $simulation->photo_type_id);
-        })
-            ->where('make', $dominantMake)
-            // ->where('focal_length', $dominantFocal) // <-- à activer si vous limitez à la focale dominante
-            ->orderBy('aperture');
-
-        $photos = $photosQuery->get();
-        // dd($photos);
-        // 6) Créer 3 séries de 3 photos, sans réutiliser la même photo
-        //    et en veillant à ce que, pour chaque série, l'ouverture soit unique.
-        $maxSeries = 3;
-        $photosPerSeries = 3;
-        $selectedPhotosBySeries = [];
-        $usedPhotoIds = [];  // pour n'utiliser qu'une fois chaque photo
-
-        for ($series = 0; $series < $maxSeries; $series++) {
-            // Exclure les photos déjà utilisées TOUTES séries confondues
-            $availablePhotos = $photos->reject(function ($photo) use ($usedPhotoIds) {
-                return in_array($photo->id, $usedPhotoIds);
-            });
-
-            // On mémorise ici les ouvertures déjà choisies pour cette série
-            $usedAperturesThisSeries = [];
-
-            // Remplir la série courante (max 3 photos) avec des ouvertures distinctes
-            foreach ($availablePhotos as $photo) {
-                if (count($selectedPhotosBySeries[$series] ?? []) < $photosPerSeries) {
-                    // Vérifier si l'ouverture est déjà utilisée dans cette série
-                    $aperture = $photo->aperture; // Adaptez si votre champ se nomme autrement
-                    if (! in_array($aperture, $usedAperturesThisSeries)) {
-                        // OK, on l'ajoute à la série
-                        $selectedPhotosBySeries[$series][] = $photo;
-                        $usedPhotoIds[] = $photo->id;
-                        $usedAperturesThisSeries[] = $aperture;
+            for ($series = 0; $series < $maxSeries; $series++) {
+                $available = $photos->reject(fn($p) => in_array($p->id, $usedPhotoIds));
+                $usedApertures = [];
+                foreach ($available as $photo) {
+                    if (count($selectedPhotosBySeries[$series] ?? []) < $photosPerSeries) {
+                        $ap = $photo->aperture;
+                        if (! in_array($ap, $usedApertures)) {
+                            $selectedPhotosBySeries[$series][] = $photo;
+                            $usedPhotoIds[] = $photo->id;
+                            $usedApertures[] = $ap;
+                        }
                     }
-                } else {
-                    // Série pleine
-                    break;
                 }
             }
-        }
 
-        // 7) S’assurer que chaque série fasse max 3 photos (au cas où)
-        foreach ($selectedPhotosBySeries as $seriesIndex => $photoSet) {
-            $selectedPhotosBySeries[$seriesIndex] = array_slice($photoSet, 0, $photosPerSeries);
+            return view('simulations.step-three', [
+                'photosByGroups' => $selectedPhotosBySeries,
+                'simulation'     => $simulation,
+            ]);
+        } else {
+            $photosAll = Photo::whereHas('photoTypes', function ($q) use ($simulation) {
+                $q->where('photo_types.id', $simulation->photo_type_id);
+            })
+                ->orderBy('aperture')
+                ->get();
+
+            $grouped = $photosAll->groupBy('make');
+            foreach ($grouped as $make => $col) {
+                $grouped[$make] = $col->shuffle();
+            }
+
+            $maxSeries = 3;
+            $photosPerSeries = 3;
+            $selectedPhotosBySeries = [];
+
+            for ($series = 0; $series < $maxSeries; $series++) {
+                foreach ($grouped as $make => $photoGroup) {
+                    $photoIndex = $series;
+                    if (isset($photoGroup[$photoIndex])) {
+                        $selectedPhotosBySeries[$series][] = $photoGroup[$photoIndex];
+                    }
+                }
+            }
+
+            return view('simulations.step-three', [
+                'photosByGroups' => $selectedPhotosBySeries,
+                'simulation'     => $simulation,
+            ]);
         }
-        // dd($selectedPhotosBySeries);
-        // 8) Retourner la vue step-three
-        return view('simulations.step-three', [
-            'photosByGroups' => $selectedPhotosBySeries,
-            'simulation'     => $simulation,
-        ]);
     }
-
 
     public function postStepThree(Request $request, Simulation $simulation)
     {
         $rules = [
-            'selectedPhotos' => 'required|array',
+            'selectedPhotos'   => 'required|array',
             'selectedPhotos.*' => 'exists:photos,id',
         ];
-
         $validator = Validator::make($request->all(), $rules);
         if ($validator->fails()) {
             return Redirect::to('simulation/' . $simulation->uuid . '/step-three')
@@ -394,195 +316,227 @@ class SimulationController extends Controller
                 'step'          => 3,
             ]);
         }
+        if (! $simulation->dominant_make) {
+            $photosStepOne   = $this->getPhotosForStep($simulation, 1);
+            $photosStepTwo   = $this->getPhotosForStep($simulation, 2);
+            $allPhotos       = $photosStepOne->merge($photosStepTwo)->merge($selectedPhotos);
 
-        session(['selectedPhotosStepThree' => $request->input('selectedPhotos')]);
+            $dominantMake = $this->findDominantMake($allPhotos);
+            if ($dominantMake) {
+                $simulation->dominant_make = $dominantMake;
+                $simulation->save();
+            }
+        }
 
         return redirect()->route('simulation.create-final-step', compact('simulation'));
     }
 
+    // --------------------------------------------------------
+    // Étape Finale
+    // --------------------------------------------------------
     public function createFinalStep(Request $request, Simulation $simulation)
     {
-        // 1) Récupération des IDs de chaque étape
-        $selectedPhotoIdsStepOne   = session('selectedPhotosStepOne', []);
-        $selectedPhotoIdsStepTwo   = session('selectedPhotosStepTwo', []);
-        $selectedPhotoIdsStepThree = session('selectedPhotosStepThree', []);
+        $photosStepOne   = $this->getPhotosForStep($simulation, 1);
+        $photosStepTwo   = $this->getPhotosForStep($simulation, 2);
+        $photosStepThree = $this->getPhotosForStep($simulation, 3);
 
-        // 2) Vérifier qu'on a bien des sélections pour chaque étape
-        if (empty($selectedPhotoIdsStepOne)) {
-            return redirect()
-                ->route('simulation.create-step-one', compact('simulation'))
+        if ($photosStepOne->isEmpty()) {
+            return redirect()->route('simulation.create-step-one', compact('simulation'))
                 ->withErrors(['error' => 'Aucune photo (étape 1).']);
         }
-        if (empty($selectedPhotoIdsStepTwo)) {
-            return redirect()
-                ->route('simulation.create-step-two', compact('simulation'))
+        if ($photosStepTwo->isEmpty()) {
+            return redirect()->route('simulation.create-step-two', compact('simulation'))
                 ->withErrors(['error' => 'Aucune photo (étape 2).']);
         }
-        if (empty($selectedPhotoIdsStepThree)) {
-            return redirect()
-                ->route('simulation.create-step-three', compact('simulation'))
+        if ($photosStepThree->isEmpty()) {
+            return redirect()->route('simulation.create-step-three', compact('simulation'))
                 ->withErrors(['error' => 'Aucune photo (étape 3).']);
         }
 
-        // 3) Charger les photos de chaque étape
-        $photosStepOne   = Photo::whereIn('id', $selectedPhotoIdsStepOne)->get();
-        $photosStepTwo   = Photo::whereIn('id', $selectedPhotoIdsStepTwo)->get();
-        $photosStepThree = Photo::whereIn('id', $selectedPhotoIdsStepThree)->get();
-
-        // ----------------------------------------------------
-        // Étape 1 : Marque dominante (colorimétrie)
-        // ----------------------------------------------------
-        $makeCounts   = $photosStepOne->groupBy('make')->map->count();
-        $dominantMake = $makeCounts->sortDesc()->keys()->first();  // ex. "Canon"
-
-        // ----------------------------------------------------
-        // Étape 2 : Extraire jusqu’à 3 focales “dominantes”
-        // ----------------------------------------------------
-        $focalValuesStepTwo = $photosStepTwo->map(function ($photo) {
-            if (strpos($photo->focal_length, '/') !== false) {
-                [$num, $den] = explode('/', $photo->focal_length);
-                return $num / $den; // ex. "30/1" => 30.0
+        $dominantMake = $simulation->dominant_make;
+        $focalValues = $photosStepTwo->map(function ($p) {
+            if (strpos($p->focal_length, '/') !== false) {
+                [$num, $den] = explode('/', $p->focal_length);
+                return $num / $den;
             }
-            return (float) $photo->focal_length;
+            return (float) $p->focal_length;
         });
-        $focalCounts     = $focalValuesStepTwo->countBy(); 
-        $topFocalValues  = $focalCounts->sortDesc()->keys()->take(3); 
-        // ex. s’il y a 2 focales => on aura 2
-        
-        // S’il n’y a qu’une ou deux focales, on duplique 
-        // pour être sûr d’en avoir 3 (si possible)
+        $focalCounts = $focalValues->countBy();
+        $topFocalValues = $focalCounts->sortDesc()->keys()->take(3);
         while ($topFocalValues->count() < 3 && $topFocalValues->count() > 0) {
-            // Dupliquer la plus fréquente (qui est en premier)
-            $focalToDuplicate = $topFocalValues->first();
-            $topFocalValues->push($focalToDuplicate);
+            $topFocalValues->push($topFocalValues->first());
         }
-        // ex. [10, 17, 300] si l’utilisateur a choisi 10, 17, 300
-        // dd($focalValuesStepTwo);
-        // ----------------------------------------------------
-        // Récupérer la liste des boîtiers "dominantMake"
-        // ----------------------------------------------------
-        // On en prend plus que 3, au cas où on manquerait. On pourra piocher dedans.
-        $cameras = Model::where('brand', $dominantMake)->take(10)->get();
 
-        // ----------------------------------------------------
-        // Générer 3 packs (1 par focale),
-        // en réutilisant le matos si on n’a pas assez de choix distincts
-        // ----------------------------------------------------
-        $packs = collect();
-        $cameraUsed    = []; // pour éviter la duplication inutile si on a assez de boîtiers
-        $lensUsed      = []; // idem pour les objectifs
+        $apertureValues = $photosStepThree->map(function ($p) {
+            $apStr = str_replace('f/', '', $p->aperture);
+            return (float) $apStr;
+        });
+        $apertureCounts = $apertureValues->countBy();
+        $topApertureValues = $apertureCounts->sortDesc()->keys()->take(3);
+        while ($topApertureValues->count() < 3 && $topApertureValues->count() > 0) {
+            $topApertureValues->push($topApertureValues->first());
+        }
 
-        $focaleIndex = 0; // On avance dans topFocalValues
-        $packCount   = 0; // Combien de packs créés
+        $camerasQuery = Model::query();
+        if ($dominantMake) {
+            $camerasQuery->where('brand', $dominantMake);
+        }
+        $cameras = $camerasQuery->take(10)->get();
 
-        while ($packCount < 3 && $focaleIndex < $topFocalValues->count()) {
-            $focal = $topFocalValues[$focaleIndex];
+        $lensesAll = Lens::all();
 
-            // Étape A) Chercher un boîtier (priorité à un boîtier qu’on n’a pas encore utilisé)
-            $camera = $this->pickCamera($cameras, $cameraUsed);
-            if (! $camera) {
-                // plus de boîtiers disponibles, on tente la réutilisation forcée
-                $camera = $cameras->first();
+        $packs      = collect();
+        $usedCombos = [];
+        $cameraUsed = [];
+        $lensUsed   = [];
+
+        for ($i = 0; $i < 3; $i++) {
+            $focal    = $topFocalValues[$i];
+            $aperture = $topApertureValues[$i];
+
+            $attempts     = 0;
+            $maxAttempts  = 8;
+            $packCamera   = null;
+            $packLens     = null;
+            $foundPack    = false;
+
+            while (! $foundPack && $attempts < $maxAttempts) {
+                $attempts++;
+                $camera = $this->pickCamera($cameras, $cameraUsed);
+                if (! $camera && $cameras->count()) {
+                    $camera = $cameras->random();
+                }
                 if (! $camera) {
-                    // Aucune caméra en base => impossible de poursuivre
                     break;
+                }
+                $lens = $this->findLensFor($focal, $aperture, $dominantMake, $lensUsed);
+                if (! $lens) {
+                    $lens = $this->findLensFor($focal, $aperture, null, $lensUsed);
+                }
+                if (! $lens && $lensesAll->count()) {
+                    $lens = $lensesAll->random();
+                }
+                if (! $lens) {
+                    continue;
+                }
+                $sharedMounts = $camera->mounts->intersect($lens->mounts);
+                if ($sharedMounts->isEmpty()) {
+                    continue;
+                }
+                $comboKey = $camera->id . '_' . $lens->id;
+                if (in_array($comboKey, $usedCombos)) {
+                    continue;
+                }
+                $packCamera = $camera;
+                $packLens   = $lens;
+                $foundPack  = true;
+
+                $usedCombos[] = $comboKey;
+                $cameraUsed[] = $camera->id;
+                $lensUsed[]  = $lens->id;
+            }
+
+            if (! $foundPack) {
+                $packCamera = $cameras->get($i) ?? ($cameras->count() ? $cameras->random() : null);
+                $packLens   = $lensesAll->get($i) ?? ($lensesAll->count() ? $lensesAll->random() : null);
+                if (! $packCamera || ! $packLens) {
+                    break;
+                }
+                $comboKey = $packCamera->id . '_' . $packLens->id;
+                if (! in_array($comboKey, $usedCombos)) {
+                    $usedCombos[] = $comboKey;
                 }
             }
 
-            // Étape B) Chercher un objectif pour cette focale
-            $lens = $this->findLensForFocal($focal, $dominantMake, $lensUsed);
-            if (! $lens) {
-                // Pas d’objectif => on skip cette focale
-                $focaleIndex++;
-                continue;
-            }
+            $totalPrice = (float)$packCamera->price + (float)$packLens->price;
+            $monthly   = round($totalPrice / 36, 2);
 
-            // Étape C) Vérifier la compatibilité monture
-            $sharedMounts = $camera->mounts->intersect($lens->mounts);
-            if ($sharedMounts->isEmpty()) {
-                // On peut essayer un autre objectif, ou un autre boîtier
-                // Pour garder un code simple, on skip la focale
-                $focaleIndex++;
-                continue;
-            }
-
-            // Étape D) Calcul du prix (LOA 36 mois)
-            $totalPrice = (float) $camera->price + (float) $lens->price;
-            $monthly    = round($totalPrice / 36, 2);
-
-            // Choisir un titre
-            $packTitle = match ($packCount) {
+            $packTitle = match ($i) {
                 0 => 'Pack Essentiel',
                 1 => 'Pack Recommandé',
                 2 => 'Pack Premium',
-                default => 'Pack #'.($packCount+1),
+                default => 'Pack #' . ($i + 1),
             };
-
-            // Enregistrer le pack
             $packs->push([
-                'title'          => $packTitle,
-                'camera'         => $camera,
-                'lens'           => $lens,
+                'title' => $packTitle,
+                'camera' => $packCamera,
+                'lens' => $packLens,
                 'focalRequested' => $focal,
-                'price'          => $monthly,
+                'apertureWanted' => $aperture,
+                'price' => $monthly,
             ]);
-
-            // Marquer qu’on a utilisé ce boîtier / objectif
-            $cameraUsed[] = $camera->id;
-            $lensUsed[]   = $lens->id;
-
-            // Passer à la focale suivante
-            $focaleIndex++;
-            $packCount++;
         }
 
-        // Si, à l’issue, on a moins de 3 packs,
-        // on peut tenter d’en rajouter en piochant dans les focales suivantes (si >3 focales)
-        // ou en dupliquant des focales. Mais ici, on s’en tient à 3 max.
         return view('simulations.final-step', [
             'simulation' => $simulation,
-            'packs'      => $packs,
+            'packs' => $packs,
         ]);
     }
-    private function findLensForFocal(float $focal, string $dominantMake, array $lensUsed)
+
+    // -----------------------------------------------------------------
+    // HELPERS
+    // -----------------------------------------------------------------
+
+    private function findDominantMake($photos)
     {
-        // 1) Tenter un objectif qui couvre exactement la focale
-        $candidate = Lens::where('brand', $dominantMake)
+        if ($photos->isEmpty()) {
+            return null;
+        }
+
+        $makeCounts = $photos->groupBy('make')->map->count();
+        $sorted = $makeCounts->sortDesc();
+
+        $dominant = $sorted->keys()->first();
+        $dominantCount = $sorted->values()->first();
+
+        $secondCount = $sorted->values()->skip(1)->first() ?? 0;
+
+        if ($dominantCount > $secondCount) {
+            return $dominant;
+        }
+
+        return null;
+    }
+
+    private function getPhotosForStep(Simulation $simulation, int $step)
+    {
+        return Photo::select('photos.*')
+            ->join('simulation_photos', 'simulation_photos.photo_id', '=', 'photos.id')
+            ->where('simulation_photos.simulation_id', $simulation->id)
+            ->where('simulation_photos.step', $step)
+            ->get();
+    }
+
+    private function pickCamera($cameras, array $cameraUsed)
+    {
+        $newOne = $cameras->first(fn($cam) => ! in_array($cam->id, $cameraUsed));
+        return $newOne ?: null;
+    }
+
+    private function findLensFor(float $focal, float $aperture, ?string $dominantMake, array $lensUsed)
+    {
+        $query = Lens::query()
             ->whereNotIn('id', $lensUsed)
             ->where('min_focal_length', '<=', $focal)
             ->where('max_focal_length', '>=', $focal)
-            ->first();
+            ->where('min_aperture', '<=', $aperture)
+            ->where('max_aperture', '>=', $aperture);
+
+        if ($dominantMake) {
+            $query->where('brand', $dominantMake);
+        }
+        $candidate = $query->first();
         if ($candidate) {
             return $candidate;
         }
 
-        // 2) Fallback => tri "le plus proche"
-        //    On exclut aussi ceux déjà utilisés.
-        $candidate = Lens::where('brand', $dominantMake)
-            ->whereNotIn('id', $lensUsed)
-            ->orderByRaw("ABS((min_focal_length + max_focal_length)/2 - ?)", [$focal])
-            ->first();
-
-        return $candidate;
-    }
-
-    /**
-     * Sélectionne un boîtier "neuf" (non utilisé) si possible,
-     * sinon, si on n’en a plus de dispo, on autorise la réutilisation.
-     */
-    private function pickCamera($cameras, array $cameraUsed)
-    {
-        // 1) Tenter un boîtier pas encore utilisé
-        $newOne = $cameras->first(function ($cam) use ($cameraUsed) {
-            return ! in_array($cam->id, $cameraUsed);
-        });
-
-        if ($newOne) {
-            return $newOne;
+        $fallback = Lens::query()->whereNotIn('id', $lensUsed);
+        if ($dominantMake) {
+            $fallback->where('brand', $dominantMake);
         }
-
-        // 2) Pas de boîtier neuf ? alors on renvoie null,
-        //    le code appelant pourra décider de piocher autrement
-        return null;
+        $candidate = $fallback
+            ->orderByRaw("ABS(((min_focal_length+max_focal_length)/2 - ?))", [$focal])
+            ->first();
+        return $candidate;
     }
 }
