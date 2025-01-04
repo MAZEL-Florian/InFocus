@@ -29,7 +29,7 @@
             
             @auth
             <div class="hidden sm:flex sm:items-center sm:ms-6">
-                <a href="{{ route('simulation.index') }}" class="infocus-btn-primary text-infocus-twilightblue py-2 px-4 rounded  font-medium">{{ __('Find my ideal gear') }}</a>
+                <a href="{{ route('simulation.index') }}" class="infocus-btn-primary text-infocus-twilightblue py-2 px-4 rounded font-medium">{{ __('Find my ideal gear') }}</a>
 
                 <!-- Settings Dropdown -->
                 <div class="ms-3 relative">
