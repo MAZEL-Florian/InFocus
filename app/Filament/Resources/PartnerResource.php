@@ -37,7 +37,7 @@ class PartnerResource extends Resource
                     ->required()
                     ->label('Nom')
                     ->maxLength(255),
-                Forms\Components\FileUpload::make('image')
+                Forms\Components\FileUpload::make('image_url')
                     ->label('Image')
                     ->directory('partners-logo')
                     ->required()
@@ -50,7 +50,7 @@ class PartnerResource extends Resource
             ->columns([
                 Tables\Columns\TextColumn::make('name')
                     ->searchable(),
-                Tables\Columns\ImageColumn::make('image')
+                Tables\Columns\ImageColumn::make('image_url')
                     ->searchable(),
                 Tables\Columns\TextColumn::make('created_at')
                     ->dateTime()
