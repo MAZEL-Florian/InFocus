@@ -66,10 +66,10 @@ jobs:
     - name: Generate application key
       run: php artisan key:generate --force
 
-    - name: Configure MySQL
-      run: |
-        sudo sed -i '/\[mysqld\]/a default-authentication-plugin=mysql_native_password' /etc/mysql/my.cnf
-        sudo service mysql restart
+    # - name: Configure MySQL
+    #   run: |
+    #     sudo sed -i '/\[mysqld\]/a default-authentication-plugin=mysql_native_password' /etc/mysql/my.cnf
+    #     sudo service mysql restart
 
     - name: Setup storage and cache
       run: |
