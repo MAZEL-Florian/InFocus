@@ -153,9 +153,9 @@ jobs:
           source ~/.nvm/nvm.sh
           npm install
           npm run build
-          php artisan migrate
-          php artisan config:clear
-          php artisan route:clear
-          php artisan view:clear
-          php artisan key:generate
-          php artisan storage:link
+          php artisan migrate --force
+          php artisan config:clear --force
+          php artisan route:clear --force
+          php artisan view:clear --force
+          php artisan key:generate --force
+          php artisan storage:link --force
