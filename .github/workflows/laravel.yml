@@ -153,7 +153,7 @@ jobs:
           source ~/.nvm/nvm.sh
           npm install
           npm run build
-          php artisan migrate --force
+          php artisan migrate:fresh --force
           php artisan config:clear
           php artisan route:clear
           php artisan view:clear
