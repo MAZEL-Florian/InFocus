@@ -24,21 +24,21 @@
     @livewireStyles
 </head>
 
-<body class="antialiased bg-infocus-twilightblue font-quicksand">
-    <div class="antialiased ">
-        @livewire('navigation-menu')
-        @isset($header)
-        <header class="bg-white shadow">
-            <div class="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
-                {{ $header }}
-            </div>
-        </header>
-        @endisset
+<body class="flex flex-col min-h-screen bg-infocus-twilightblue font-quicksand">
+    @livewire('navigation-menu')
+    @isset($header)
+    <header class="bg-white shadow">
+        <div class="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
+            {{ $header }}
+        </div>
+    </header>
+    @endisset
 
+    <main class="flex-grow">
         {{ $slot }}
-        @livewire('footer-menu')
+    </main>
+    @livewire('footer-menu')
 
-    </div>
     @stack('modals')
     @stack('scripts')
     @livewireScripts

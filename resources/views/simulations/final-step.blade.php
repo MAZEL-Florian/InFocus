@@ -116,11 +116,11 @@
                 @endforeach
             </div>
             <div class="mt-20 flex justify-center gap-4">
-                <a href="#" class="bg-infocus-twilightblue text-infocus-icewhite py-2 px-4 rounded ml-4 font-semibold border-infocus-icewhite border
+                <a href="{{ route('pack.index') }}" class="bg-infocus-twilightblue text-infocus-icewhite py-2 px-4 rounded ml-4 font-semibold border-infocus-icewhite border
                 transition-colors duration-200">
                     Voir tous nos packs
                 </a>
-                <a href="#" class="infocus-btn-primary text-infocus-twilightblue py-2 px-4 rounded font-medium">
+                <a href="{{ route('simulation.index') }}" class="infocus-btn-primary text-infocus-twilightblue py-2 px-4 rounded font-medium">
                     Recommencer le questionnaire
                 </a>
             </div>
