@@ -77,10 +77,16 @@ class SimulationController extends Controller
         }
 
         $photoType = $simulation->photoType;
-        return view('simulations.step-one', [
+        return view('simulations.step', [
+            'currentStep' => 1,
+            'overlayTitle' => 'De la photo ' . $photoType->name . ' !<br>Choisis parmi 3 séries de 3 photos celle que tu préfères en terme de couleurs.',
+            'overlayDescription' => 'C’est ce qui va déterminer la marque de ton appareil photo.',
+            'overlayButtonText' => 'Commencer',
+            'photoType' => $photoType,
             'photosByGroups' => $selectedPhotos,
-            'simulation'     => $simulation,
-            'photoType'      => $photoType,
+            'circleOffset' => 0,
+            'forceCircles' => [],
+            'postRoute' => route('simulation.post-step-one', ['simulation' => $simulation]),
         ]);
     }
 
@@ -136,7 +142,8 @@ class SimulationController extends Controller
             $photosPerSeries = 3;
             $selectedPhotos = [];
             $usedPhotoIds   = [];
-
+            $alreadyActive = [0, 1, 2];
+            $circleOffset = 3;
             for ($series = 0; $series < $maxSeries; $series++) {
                 $available = $photos->reject(fn($p) => in_array($p->id, $usedPhotoIds));
                 foreach ($available as $photo) {
@@ -146,11 +153,6 @@ class SimulationController extends Controller
                     }
                 }
             }
-
-            return view('simulations.step-two', [
-                'photosByGroups' => $selectedPhotos,
-                'simulation'     => $simulation,
-            ]);
         } else {
             $photos = Photo::whereHas('photoTypes', function ($q) use ($simulation) {
                 $q->where('photo_types.id', $simulation->photo_type_id);
@@ -175,12 +177,19 @@ class SimulationController extends Controller
                     }
                 }
             }
-
-            return view('simulations.step-two', [
-                'photosByGroups' => $selectedPhotos,
-                'simulation'     => $simulation,
-            ]);
         }
+        return view('simulations.step', [
+            'currentStep' => 2,
+            'overlayTitle' => 'La colorimétrie c’est fait.',
+            'overlayDescription' => 'Je souhaite maintenant que tu choisisse ta focale. C’est le niveau de zoom. Regarde l’arrière plan des photos et choisi celui que tu préfère. (Loin du sujet ou proche)<br> Cela vas déterminer en parti tes objectifs. ',
+            'overlayButtonText' => 'Commencer',
+
+            'photosByGroups' => $selectedPhotos,
+
+            'circleOffset'   => $circleOffset,
+            'forceCircles'   => $alreadyActive,
+            'postRoute' => route('simulation.post-step-two', ['simulation' => $simulation]),
+        ]);
     }
 
     public function postStepTwo(Request $request, Simulation $simulation)
@@ -260,10 +269,10 @@ class SimulationController extends Controller
                 }
             }
 
-            return view('simulations.step-three', [
-                'photosByGroups' => $selectedPhotosBySeries,
-                'simulation'     => $simulation,
-            ]);
+            // return view('simulations.step-three', [
+            //     'photosByGroups' => $selectedPhotosBySeries,
+            //     'simulation'     => $simulation,
+            // ]);
         } else {
             $photosAll = Photo::whereHas('photoTypes', function ($q) use ($simulation) {
                 $q->where('photo_types.id', $simulation->photo_type_id);
@@ -288,12 +297,21 @@ class SimulationController extends Controller
                     }
                 }
             }
-
-            return view('simulations.step-three', [
-                'photosByGroups' => $selectedPhotosBySeries,
-                'simulation'     => $simulation,
-            ]);
         }
+        $alreadyActive = [0, 1, 2, 3, 4, 5];
+
+        $circleOffset = 6;
+        return view('simulations.step', [
+            'currentStep' => 3,
+            'overlayTitle' => 'Parlons peu parlons ouverture.',
+            'overlayDescription' => 'Ma partie préférée, c’est le flou d’arrière plan. Choisi celui que tu trouve le plus agréable à regarder selon toi. N’aie pas peur tous les objectifs sont capables de faire un arrière plan net. <br>C’est ce qui fini de déterminer tes objectifs.',
+            'overlayButtonText' => 'Commencer',
+            'photosByGroups' => $selectedPhotosBySeries,
+
+            'circleOffset'   => $circleOffset,
+            'forceCircles'   => $alreadyActive,
+            'postRoute' => route('simulation.post-step-three', ['simulation' => $simulation]),
+        ]);
     }
 
     public function postStepThree(Request $request, Simulation $simulation)
@@ -467,10 +485,10 @@ class SimulationController extends Controller
                 0 => 'Pack Essentiel',
                 1 => 'Pack Recommandé',
                 2 => 'Pack Premium',
-                default => 'Pack #'.($index+1),
+                default => 'Pack #' . ($index + 1),
             };
             $pack['title'] = $newTitle;
-        
+
             return $pack;
         });
         return view('simulations.final-step', [
