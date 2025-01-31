@@ -1,161 +1,161 @@
-# name: CI/CD Pipeline
+name: CI/CD Pipeline
 
-# on:
-#   push:
-#     branches:
-#       - main
-#   pull_request:
-#     branches:
-#       - main
-# jobs:
-#   laravel-tests:
-#     runs-on: ubuntu-latest
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+jobs:
+  laravel-tests:
+    runs-on: ubuntu-latest
 
-#     services:
-#       mysql:
-#         image: mysql:5.7
-#         env:
-#           MYSQL_ROOT_PASSWORD: root
-#           MYSQL_DATABASE: test_db
-#         ports:
-#           - 3306:3306
-#         options: >-
-#           --health-cmd="mysqladmin ping --silent"
-#           --health-interval=10s
-#           --health-timeout=5s
-#           --health-retries=3
+    services:
+      mysql:
+        image: mysql:5.7
+        env:
+          MYSQL_ROOT_PASSWORD: root
+          MYSQL_DATABASE: test_db
+        ports:
+          - 3306:3306
+        options: >-
+          --health-cmd="mysqladmin ping --silent"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=3
 
-#     steps:
-#     - name: Checkout repository
-#       uses: actions/checkout@v2
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v2
 
-#     - name: Set up PHP
-#       uses: shivammathur/setup-php@v2
-#       with:
-#         php-version: 8.1.5
-#         extensions: mbstring, pdo, pdo_mysql, intl, bcmath
-#         ini-values: |
-#           memory_limit = 512M
-#         coverage: none
+    - name: Set up PHP
+      uses: shivammathur/setup-php@v2
+      with:
+        php-version: 8.1.5
+        extensions: mbstring, pdo, pdo_mysql, intl, bcmath
+        ini-values: |
+          memory_limit = 512M
+        coverage: none
 
-#     - name: Update composer
-#       run: composer update
+    - name: Update composer
+      run: composer update
       
-#     - name: Install dependencies
-#       run: composer install --prefer-dist --no-progress --optimize-autoloader
+    - name: Install dependencies
+      run: composer install --prefer-dist --no-progress --optimize-autoloader
 
-#     - name: Install npm dependencies
-#       run: npm install
+    - name: Install npm dependencies
+      run: npm install
 
-#     - name: Build assets
-#       run: npm run build
+    - name: Build assets
+      run: npm run build
 
-#     - name: Create .env file
-#       run: |
-#         cp .env.example .env
-#         echo "APP_KEY=base64:$(php -r 'echo base64_encode(random_bytes(32));')" >> .env
-#         echo "DB_CONNECTION=mysql" >> .env
-#         echo "DB_HOST=127.0.0.1" >> .env
-#         echo "DB_PORT=3306" >> .env
-#         echo "DB_DATABASE=test_db" >> .env
-#         echo "DB_USERNAME=root" >> .env
-#         echo "DB_PASSWORD=root" >> .env
-#         echo "SESSION_DRIVER=file" >> .env
-#         php artisan config:cache
+    - name: Create .env file
+      run: |
+        cp .env.example .env
+        echo "APP_KEY=base64:$(php -r 'echo base64_encode(random_bytes(32));')" >> .env
+        echo "DB_CONNECTION=mysql" >> .env
+        echo "DB_HOST=127.0.0.1" >> .env
+        echo "DB_PORT=3306" >> .env
+        echo "DB_DATABASE=test_db" >> .env
+        echo "DB_USERNAME=root" >> .env
+        echo "DB_PASSWORD=root" >> .env
+        echo "SESSION_DRIVER=file" >> .env
+        php artisan config:cache
 
-#     - name: Generate application key
-#       run: php artisan key:generate --force
+    - name: Generate application key
+      run: php artisan key:generate --force
 
-#     # - name: Configure MySQL
-#     #   run: |
-#     #     sudo sed -i '/\[mysqld\]/a default-authentication-plugin=mysql_native_password' /etc/mysql/my.cnf
-#     #     sudo service mysql restart
+    # - name: Configure MySQL
+    #   run: |
+    #     sudo sed -i '/\[mysqld\]/a default-authentication-plugin=mysql_native_password' /etc/mysql/my.cnf
+    #     sudo service mysql restart
 
-#     - name: Setup storage and cache
-#       run: |
-#         mkdir -p storage/logs
-#         touch storage/logs/laravel.log
-#         php artisan storage:link
-#         php artisan cache:clear
-#         php artisan config:clear
-#         php artisan route:clear
-#         php artisan view:clear
+    - name: Setup storage and cache
+      run: |
+        mkdir -p storage/logs
+        touch storage/logs/laravel.log
+        php artisan storage:link
+        php artisan cache:clear
+        php artisan config:clear
+        php artisan route:clear
+        php artisan view:clear
 
-#     - name: Migrate and seed database
-#       env:
-#         DB_CONNECTION: mysql
-#         DB_HOST: 127.0.0.1
-#         DB_PORT: 3306
-#         DB_DATABASE: test_db
-#         DB_USERNAME: root
-#         DB_PASSWORD: root
-#       run: |
-#         php artisan migrate --force
-#         php artisan db:seed --force
+    - name: Migrate and seed database
+      env:
+        DB_CONNECTION: mysql
+        DB_HOST: 127.0.0.1
+        DB_PORT: 3306
+        DB_DATABASE: test_db
+        DB_USERNAME: root
+        DB_PASSWORD: root
+      run: |
+        php artisan migrate --force
+        php artisan db:seed --force
 
-#     - name: Run tests
-#       env:
-#         DB_CONNECTION: mysql
-#         DB_HOST: 127.0.0.1
-#         DB_PORT: 3306
-#         DB_DATABASE: test_db
-#         DB_USERNAME: root
-#         DB_PASSWORD: root
-#       run: php artisan test
+    - name: Run tests
+      env:
+        DB_CONNECTION: mysql
+        DB_HOST: 127.0.0.1
+        DB_PORT: 3306
+        DB_DATABASE: test_db
+        DB_USERNAME: root
+        DB_PASSWORD: root
+      run: php artisan test
       
-#     - name: Run PHP_CodeSniffer
-#       run: ./vendor/bin/phpcs --standard=PSR12 app/ tests/
-#       continue-on-error: true
+    - name: Run PHP_CodeSniffer
+      run: ./vendor/bin/phpcs --standard=PSR12 app/ tests/
+      continue-on-error: true
 
-#     - name: Run PHPStan
-#       run: ./vendor/bin/phpstan analyse --level=7 app/
-#       continue-on-error: true
+    - name: Run PHPStan
+      run: ./vendor/bin/phpstan analyse --level=7 app/
+      continue-on-error: true
       
-#     - name: Display Laravel logs on failure
-#       if: failure()
-#       run: |
-#         if [ -f storage/logs/laravel.log ]; then cat storage/logs/laravel.log; else echo "No log file found"; fi
+    - name: Display Laravel logs on failure
+      if: failure()
+      run: |
+        if [ -f storage/logs/laravel.log ]; then cat storage/logs/laravel.log; else echo "No log file found"; fi
 
 
 
-#   deploy:
-#     needs: laravel-tests
-#     runs-on: ubuntu-latest
+  deploy:
+    needs: laravel-tests
+    runs-on: ubuntu-latest
 
-#     steps:
-#     - name: Checkout repository
-#       uses: actions/checkout@v2
-#     - name: Copy .env
-#       run: php -r "file_exists('.env') || copy('.env.example', '.env');"
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v2
+    - name: Copy .env
+      run: php -r "file_exists('.env') || copy('.env.example', '.env');"
 
-#     - name: Sync files to Hostinger via FTP
-#       uses: SamKirkland/FTP-Deploy-Action@4.1.0
-#       with:
-#         server: ${{ secrets.FTP_SERVER }}
-#         username: ${{ secrets.FTP_USERNAME }}
-#         password: ${{ secrets.FTP_PASSWORD }}
-#         local-dir: ./ 
-#         server-dir: /public_html/
+    - name: Sync files to Hostinger via FTP
+      uses: SamKirkland/FTP-Deploy-Action@4.1.0
+      with:
+        server: ${{ secrets.FTP_SERVER }}
+        username: ${{ secrets.FTP_USERNAME }}
+        password: ${{ secrets.FTP_PASSWORD }}
+        local-dir: ./ 
+        server-dir: /public_html/
 
 
-#     - name: Run deployment commands on Hostinger via SSH
-#       if: success()
-#       uses: appleboy/ssh-action@master
-#       with:
-#         host: ${{ secrets.SSH_HOST }}
-#         username: ${{ secrets.SSH_USERNAME }}
-#         password: ${{ secrets.SSH_PASSWORD }}
-#         port: ${{ secrets.SSH_PORT }}
-#         script: |
-#           cd domains/in-focus.fr/public_html
-#           composer2 install --no-progress --no-suggest --prefer-dist --optimize-autoloader
-#           export NVM_DIR=~/.nvm
-#           source ~/.nvm/nvm.sh
-#           npm install
-#           npm run build
-#           php artisan migrate
-#           php artisan config:clear
-#           php artisan route:clear
-#           php artisan view:clear
-#           php artisan key:generate --force
-#           php artisan storage:link --force
+    - name: Run deployment commands on Hostinger via SSH
+      if: success()
+      uses: appleboy/ssh-action@master
+      with:
+        host: ${{ secrets.SSH_HOST }}
+        username: ${{ secrets.SSH_USERNAME }}
+        password: ${{ secrets.SSH_PASSWORD }}
+        port: ${{ secrets.SSH_PORT }}
+        script: |
+          cd domains/in-focus.fr/public_html
+          composer2 install --no-progress --no-suggest --prefer-dist --optimize-autoloader
+          export NVM_DIR=~/.nvm
+          source ~/.nvm/nvm.sh
+          npm install
+          npm run build
+          php artisan migrate
+          php artisan config:clear
+          php artisan route:clear
+          php artisan view:clear
+          php artisan key:generate --force
+          php artisan storage:link --force
