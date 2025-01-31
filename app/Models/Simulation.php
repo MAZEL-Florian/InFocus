@@ -14,7 +14,7 @@ class Simulation extends Model
     {
         parent::boot();
 
-        static::creating(function  ($model)  {
+        static::creating(function ($model) {
             $model->uuid = (string) Str::uuid();
             // $model->slug_reference = (string) bin2hex(random_bytes(6));
         });
@@ -26,11 +26,22 @@ class Simulation extends Model
     }
 
     protected $fillable = [
-       'photo_type_id', 'user_id'
+        'photo_type_id',
+        'user_id'
     ];
 
     public function user()
     {
         return $this->belongsTo(User::class);
+    }
+
+    public function photoType()
+    {
+        return $this->belongsTo(PhotoType::class);
+    }
+
+    public function simulationPhotos()
+    {
+        return $this->hasMany(SimulationPhoto::class);
     }
 }

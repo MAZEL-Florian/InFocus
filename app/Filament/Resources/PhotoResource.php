@@ -41,15 +41,17 @@ class PhotoResource extends Resource
                     ->label('Image')
                     ->multiple()
                     ->required()
+                    ->maxSize(40000)
                     ->directory('photos'),
-                Forms\Components\Select::make('photo_type_id')
-                    ->label('Type de Photographie')
+                    Forms\Components\Select::make('photo_types')
+                    ->label('Types de Photographie')
                     ->multiple()
-                    ->relationship('photoTypes', 'name')
-                    ->options(PhotoType::all()->pluck('name', 'id'))
+                    ->options(
+                        PhotoType::query()->pluck('name', 'id')
+                    )
                     ->required()
                     ->searchable(),
-
+                
             ]);
     }
 
@@ -75,6 +77,9 @@ class PhotoResource extends Resource
                     ->sortable(),
                 Tables\Columns\TextColumn::make('focal_length')
                     ->label('Distance Focale')
+                    ->searchable(),
+                Tables\Columns\TextColumn::make('aperture')
+                    ->label('Ouverture')
                     ->searchable(),
                 Tables\Columns\TextColumn::make('created_at')
                     ->label('Date de création')

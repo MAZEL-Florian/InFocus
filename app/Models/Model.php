@@ -14,7 +14,7 @@ class Model extends EloquentModel
     {
         parent::boot();
 
-        static::creating(function  ($model)  {
+        static::creating(function ($model) {
             $model->uuid = (string) Str::uuid();
             // $model->slug_reference = (string) bin2hex(random_bytes(6));
         });
@@ -26,7 +26,14 @@ class Model extends EloquentModel
     }
 
     protected $fillable = [
-        'name', 'camera_model', 'aperture', 'shutter_speed', 'iso', 'focal_length', 'price_wot', 'price'
+        'name',
+        'camera_model',
+        'aperture',
+        'shutter_speed',
+        'iso',
+        'focal_length',
+        'price_wot',
+        'price'
     ];
 
     public function photos()
@@ -37,5 +44,9 @@ class Model extends EloquentModel
     public function lenses()
     {
         return $this->hasMany(Lens::class);
+    }
+    public function mounts()
+    {
+        return $this->belongsToMany(Mount::class, 'model_mount');
     }
 }

@@ -1,12 +1,12 @@
 .infocus-btn-primary {
     /* display: flex; */
-    height: 48px;
-    padding: 13px 28px;
-    justify-content: center;
-    align-items: center;
-    gap: 10px;
-    flex: 1 0 0;
-    border-radius: 6px;
+    /* height: 48px; */
+    /* padding: 13px 28px; */
+    /* justify-content: center; */
+    /* align-items: center; */
+    /* gap: 10px; */
+    /* flex: 1 0 0; */
+    /* border-radius: 6px; */
     background: var(--Blanc-glacier, #F6FDFF);
 }
 
@@ -20,4 +20,43 @@
 
 .infocus-btn-primary:hover {
     box-shadow: 0px 20px 95px 0px #FFFFFF40;
+}
+.photo-item {
+    position: relative;
+    overflow: visible;
+    border-radius: 10px;
+    transition: transform 0.3s ease-in-out, box-shadow 0.3s ease-in-out;
+}
+
+/* Survol */
+.photo-item:hover {
+    transform: scale(1.02);
+    z-index: 10;
+    box-shadow: 0 6px 15px rgba(246,253,255,0.8);
+}
+
+.photo-item.selected {
+    transform: scale(1.03);
+}
+.photo-item.selected img {
+    opacity: 0.6;
+}
+.photo-item.selected:hover {
+    transform: scale(1.02);
+    box-shadow: 0 8px 20px rgba(246,253,255,0.8);
+}
+
+.custom-scrollbar::-webkit-scrollbar {
+    height: 8px;
+}
+.custom-scrollbar::-webkit-scrollbar-track {
+    background: #444;
+}
+.custom-scrollbar::-webkit-scrollbar-thumb {
+    background: #fff;
+    border: 2px solid #444;
+    border-radius: 9999px;
+}
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+    background: #f0f0f0;
 }

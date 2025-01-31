@@ -16,9 +16,9 @@ class Photo extends Model
 {
     use HasFactory;
 
-    protected $casts = [
-        'image_url' => 'array',
-    ];
+    // protected $casts = [
+    //     'image_url' => 'array',
+    // ];
 
     protected  static  function  boot()
     {

@@ -38,6 +38,10 @@ Route::middleware(['auth:sanctum', config('jetstream.auth_session'), 'verified',
     Route::get('/simulation/{simulation}/step-one', [SimulationController::class, 'createStepOne'])->name('simulation.create-step-one');
     Route::post('/simulation/{simulation}/step-one', [SimulationController::class, 'postStepOne'])->name('simulation.post-step-one');
     Route::get('/simulation/{simulation}/step-two', [SimulationController::class, 'createStepTwo'])->name('simulation.create-step-two');
+    Route::post('/simulation/{simulation}/step-two', [SimulationController::class, 'postStepTwo'])->name('simulation.post-step-two');
+    Route::get('/simulation/{simulation}/step-three', [SimulationController::class, 'createStepThree'])->name('simulation.create-step-three');
+    Route::post('/simulation/{simulation}/step-three', [SimulationController::class, 'postStepThree'])->name('simulation.post-step-three');
+    Route::get('/simulation/{simulation}/final-step', [SimulationController::class, 'createFinalStep'])->name('simulation.create-final-step');
 
 
 });

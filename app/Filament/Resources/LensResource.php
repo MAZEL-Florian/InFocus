@@ -37,12 +37,24 @@ class LensResource extends Resource
                     ->label('Nom')
                     ->required()
                     ->maxLength(255),
-                Forms\Components\FileUpload::make('image_url')
-                    ->label('Image')
-                    ->image()
-                    ->required(),
-                Forms\Components\TextInput::make('focal_length')
-                    ->label('Distance Focale')
+                Forms\Components\TextInput::make('brand')
+                    ->label('Marque')
+                    ->required()
+                    ->maxLength(255),
+                Forms\Components\TextInput::make('min_focal_length')
+                    ->label('Distance Focale Minimum')
+                    ->required()
+                    ->maxLength(255),
+                Forms\Components\TextInput::make('max_focal_length')
+                    ->label('Distance Focale Maximum')
+                    ->required()
+                    ->maxLength(255),
+                Forms\Components\TextInput::make('min_aperture')
+                    ->label('Ouverture Minimum')
+                    ->required()
+                    ->maxLength(255),
+                Forms\Components\TextInput::make('max_aperture')
+                    ->label('Ouverture Maximum')
                     ->required()
                     ->maxLength(255),
                 Forms\Components\TextInput::make('price_wot')
@@ -55,6 +67,10 @@ class LensResource extends Resource
                     ->required()
                     ->numeric()
                     ->prefix('€'),
+                Forms\Components\FileUpload::make('image_url')
+                    ->label('Image')
+                    ->image()
+                    ->required(),
             ]);
     }
 
@@ -62,19 +78,33 @@ class LensResource extends Resource
     {
         return $table
             ->columns([
-                Tables\Columns\TextColumn::make('uuid')
-                    ->label('UUID')
-                    ->searchable(),
                 Tables\Columns\TextColumn::make('name')
+                    ->label('Nom')
                     ->searchable(),
-                Tables\Columns\ImageColumn::make('image_url'),
-                Tables\Columns\TextColumn::make('focal_length')
+                    Tables\Columns\TextColumn::make('brand')
+                    ->label('Marque')
+                    ->searchable(),
+                Tables\Columns\ImageColumn::make('image_url')
+                    ->label('Image'),
+                Tables\Columns\TextColumn::make('min_focal_length')
+                    ->label('Distance focale min.')
+                    ->searchable(),
+                Tables\Columns\TextColumn::make('max_focal_length')
+                    ->label('Distance focale max.')
+                    ->searchable(),
+                Tables\Columns\TextColumn::make('min_aperture')
+                    ->label('Ouverture min.')
+                    ->searchable(),
+                Tables\Columns\TextColumn::make('max_aperture')
+                    ->label('Ouverture max.')
                     ->searchable(),
                 Tables\Columns\TextColumn::make('price_wot')
-                    ->numeric()
+                    ->label('Prix HT')
+                    ->money('EUR')
                     ->sortable(),
                 Tables\Columns\TextColumn::make('price')
-                    ->money()
+                    ->label('Prix TTC')
+                    ->money('EUR')
                     ->sortable(),
                 Tables\Columns\TextColumn::make('created_at')
                     ->dateTime()

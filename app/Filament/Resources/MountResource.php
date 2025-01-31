@@ -2,9 +2,9 @@
 
 namespace App\Filament\Resources;
 
-use App\Filament\Resources\ModelResource\Pages;
-use App\Filament\Resources\ModelResource\RelationManagers;
-use App\Models\Model;
+use App\Filament\Resources\MountResource\Pages;
+use App\Filament\Resources\MountResource\RelationManagers;
+use App\Models\Mount;
 use Filament\Forms;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
@@ -13,18 +13,18 @@ use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
 
-class ModelResource extends Resource
+class MountResource extends Resource
 {
-    protected static ?string $model = Model::class;
+    protected static ?string $model = Mount::class;
 
     public static function getBreadcrumb(): string
     {
-        return 'Boîtiers';
+        return 'Montures';
     }
 
     public static function getNavigationLabel(): string
     {
-        return 'Boîtiers';
+        return 'Montures';
     }
 
     protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
@@ -34,27 +34,12 @@ class ModelResource extends Resource
         return $form
             ->schema([
                 Forms\Components\TextInput::make('name')
-                    ->required()
                     ->label('Nom')
+                    ->required()
                     ->maxLength(255),
-                Forms\Components\FileUpload::make('image_url')
-                    ->label('Image')
-                    ->image()
-                    ->required(),
                 Forms\Components\TextInput::make('brand')
                     ->label('Marque')
-                    ->required()
                     ->maxLength(255),
-                Forms\Components\TextInput::make('price_wot')
-                    ->label('Prix HT')
-                    ->required()
-                    ->numeric()
-                    ->prefix('€'),
-                Forms\Components\TextInput::make('price')
-                    ->label('Prix')
-                    ->required()
-                    ->numeric()
-                    ->prefix('€'),
             ]);
     }
 
@@ -65,19 +50,9 @@ class ModelResource extends Resource
                 Tables\Columns\TextColumn::make('name')
                     ->label('Nom')
                     ->searchable(),
-                Tables\Columns\ImageColumn::make('image_url')
-                    ->label('Image'),
                 Tables\Columns\TextColumn::make('brand')
                     ->label('Marque')
                     ->searchable(),
-                Tables\Columns\TextColumn::make('price_wot')
-                    ->label('Prix HT')
-                    ->money('EUR')
-                    ->sortable(),
-                Tables\Columns\TextColumn::make('price')
-                    ->label('Prix')
-                    ->money('EUR')
-                    ->sortable(),
                 Tables\Columns\TextColumn::make('created_at')
                     ->dateTime()
                     ->sortable()
@@ -110,9 +85,9 @@ class ModelResource extends Resource
     public static function getPages(): array
     {
         return [
-            'index' => Pages\ListModels::route('/'),
-            'create' => Pages\CreateModel::route('/create'),
-            'edit' => Pages\EditModel::route('/{record}/edit'),
+            'index' => Pages\ListMounts::route('/'),
+            'create' => Pages\CreateMount::route('/create'),
+            'edit' => Pages\EditMount::route('/{record}/edit'),
         ];
     }
 }
