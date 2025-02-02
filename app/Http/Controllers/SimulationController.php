@@ -142,8 +142,7 @@ class SimulationController extends Controller
             $photosPerSeries = 3;
             $selectedPhotos = [];
             $usedPhotoIds   = [];
-            $alreadyActive = [0, 1, 2];
-            $circleOffset = 3;
+           
             for ($series = 0; $series < $maxSeries; $series++) {
                 $available = $photos->reject(fn($p) => in_array($p->id, $usedPhotoIds));
                 foreach ($available as $photo) {
@@ -178,6 +177,9 @@ class SimulationController extends Controller
                 }
             }
         }
+        $alreadyActive = [0, 1, 2];
+
+        $circleOffset = 3;
         return view('simulations.step', [
             'currentStep' => 2,
             'overlayTitle' => 'La colorimétrie c’est fait.',
