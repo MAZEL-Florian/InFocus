@@ -17,6 +17,8 @@
     @vite(['resources/css/app.css', 'resources/css/components.css', 'resources/js/app.js'])
     <link rel="icon" type="image/x-icon" href="/img/Fav blanc couleur.png">
     <link rel="stylesheet" href="https://use.typekit.net/rio1oev.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Glide.js/3.2.0/glide.js"></script>
+
     <link
         href="https://fonts.googleapis.com/css2?family=ABeeZee:ital@0;1&family=Quicksand:wght@300..700&family=Ruthie&display=swap"
         rel="stylesheet">
@@ -24,10 +26,10 @@
     @livewireStyles
 </head>
 
-<body class="antialiased bg-infocus-twilightblue font-quicksand">
+<body class="flex flex-col min-h-screen bg-infocus-twilightblue font-quicksand">
     <x-banner />
 
-    <div class="min-h-screen">
+
         @livewire('navigation-menu')
         @isset($header)
         <header class="bg-white shadow">
@@ -43,7 +45,7 @@
             {{ $slot }}
         </main>
         @livewire('footer-menu')
-    </div>
+
 
     @stack('modals')
     @stack('scripts')

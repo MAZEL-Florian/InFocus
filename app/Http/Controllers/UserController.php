@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Mail;
 
 class UserController extends Controller
 {
@@ -60,5 +61,34 @@ class UserController extends Controller
     public function destroy(string $id)
     {
         //
+    }
+
+
+    public function contact()
+    {
+        return view('contact');
+    }
+
+    public function sendContact(Request $request)
+    {
+        $request->validate([
+            'nom'     => 'required|string|max:255',
+            'prenom'  => 'required|string|max:255',
+            'email'   => 'required|email',
+            'message' => 'required|string|max:250',
+        ]);
+
+        Mail::send(
+            'emails.contact',
+            ['request' => $request],
+            function ($message) use ($request) {
+                $message
+                    ->from($request->email, $request->nom . ' ' . $request->prenom)
+                    ->to(env('MAIL_FROM_ADDRESS'))
+                    ->subject('Nouveau message de contact');
+            }
+        );
+
+        return redirect()->back()->with('success', 'Votre message a bien été envoyé. Merci !');
     }
 }

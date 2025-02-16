@@ -1,8 +1,5 @@
 <x-guest-layout>
-
     <div class="py-10">
-       
-        
         <div class="max-w-7xl mx-auto sm:px-6">
 
             <div class="mx-auto max-w-screen-xl max-sm:py-16">

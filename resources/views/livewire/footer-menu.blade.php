@@ -28,10 +28,7 @@
                             <a href="{{ route('pack.index') }}" class="text-reset no-underline">Nos packs</a>
                         </p>
                         <p>
-                            <a href="#!" class="text-reset no-underline">Formations</a>
-                        </p>
-                        <p>
-                            <a href="#!" class="text-reset no-underline">A propos</a>
+                            <a href="#!" class="text-reset no-underline">Notre matériel</a>
                         </p>
                     </div>
 
@@ -43,14 +40,11 @@
                             <a href="{{ route('blog.index') }}" class="text-reset no-underline">Blog</a>
                         </p>
                         <p>
-                            <a href="#!" class="text-reset no-underline">Vidéos éducatives</a>
-                        </p>
-                        <p>
                             <a href="{{ route('faq.index') }}" class="text-reset no-underline">FAQ</a>
                         </p>
                     </div>
 
-                    <div class="w-full md:w-1/4 lg:w-1/5 xl:w-1/6 mx-auto mb-4">
+                    <div class="w-full md:w-1/4 lg:w-1/5 xl:w-1/6 mx-auto mb-4 space-y-3">
                         <!-- Links -->
                         <h6 class="font-medium text-4xl mb-4">
                             Contacts
@@ -62,7 +56,10 @@
                             <i class='bx bxs-phone text-white text-base'></i> +33 12 12 12 12
                         </p>
                         <p>
-                            <i class='bx bxs-envelope text-white text-base'></i> contact@infocus.com
+                            <i class='bx bxs-envelope text-white text-base'></i> contact.infocusfr@gmail.com
+                        </p>
+                        <p>
+                            <a href="{{ route('user.contact') }}" class="infocus-btn-primary text-infocus-twilightblue py-2 px-4 rounded font-medium">Nous contacter</a>
                         </p>
                     </div>
                     <!-- Grid column -->
@@ -99,7 +96,7 @@
                         <h6 class="font-medium mb-4">Réseaux sociaux</h6>
 
                         <a class="me-2 no-underline" href="#">
-                            <i class="bx bxl-twitter border rounded-full bg-white text-gray-700"
+                            <i class="bx bxl-youtube border rounded-full bg-white text-gray-700"
                                 style="font-size: 1.5em;"></i>
                         </a>
                         <a class="me-2 no-underline" href="#">
@@ -128,7 +125,7 @@
                     </script>
                     All rights reserved.
                     <a href="#" class="px-10">Mentions légales</a>
-                    <a href="#" class="px-10">Politique de confidentialité</a>
+                    <a href="{{ route('policy.show') }}" class="px-10">Politique de confidentialité</a>
                     <a href="#" class="px-10">CGV</a>
                     <a href="#" class="px-10">CGU</a>
                 </div>

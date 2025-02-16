@@ -7,6 +7,7 @@ use App\Http\Controllers\ProductController;
 use App\Http\Controllers\BlogController;
 use App\Http\Controllers\FaqController;
 use App\Http\Controllers\SimulationController;
+use App\Http\Controllers\UserController;
 
 /*
 |--------------------------------------------------------------------------
@@ -29,7 +30,9 @@ Route::get('/products', [ProductController::class, 'index'])->name('product.inde
 Route::get('/blog', [BlogController::class, 'index'])->name('blog.index');
 // FAQ
 Route::get('/faq', [FaqController::class, 'index'])->name('faq.index');
-
+// CONTACT
+Route::get('/contact', [UserController::class, 'contact'])->name('user.contact');
+Route::post('/contact', [UserController::class, 'sendContact'])->name('user.sendContact');
 
 Route::middleware(['auth:sanctum', config('jetstream.auth_session'), 'verified',])->group(function () {
     Route::get('/simulation', [SimulationController::class, 'index'])->name('simulation.index');
