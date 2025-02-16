@@ -135,6 +135,7 @@ jobs:
         password: ${{ secrets.FTP_PASSWORD }}
         local-dir: ./ 
         server-dir: /public_html/
+        timeout: 60000
 
 
     - name: Run deployment commands on Hostinger via SSH
