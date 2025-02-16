@@ -128,14 +128,13 @@ jobs:
       run: php -r "file_exists('.env') || copy('.env.example', '.env');"
 
     - name: Sync files to Hostinger via FTP
-      uses: SamKirkland/FTP-Deploy-Action@4.3.5
+      uses: SamKirkland/FTP-Deploy-Action@4.1.0
       with:
         server: ${{ secrets.FTP_SERVER }}
         username: ${{ secrets.FTP_USERNAME }}
         password: ${{ secrets.FTP_PASSWORD }}
         local-dir: ./ 
         server-dir: /public_html/
-        timeout: 60000
 
 
     - name: Run deployment commands on Hostinger via SSH
