@@ -95,16 +95,24 @@
                         <!-- RESEAUX SOCIAUX -->
                         <h6 class="font-medium mb-4">Réseaux sociaux</h6>
 
-                        <a class="me-2 no-underline" href="#">
+                        <a class="me-2 no-underline" target="_blank" href="https://www.youtube.com/@infocusfr">
                             <i class="bx bxl-youtube border rounded-full bg-white text-gray-700"
                                 style="font-size: 1.5em;"></i>
                         </a>
-                        <a class="me-2 no-underline" href="#">
+                        <a class="me-2 no-underline" target="_blank" href="https://www.facebook.com/profile.php?id=61572802167211">
                             <i class="bx bxl-facebook border rounded-full bg-white text-gray-700"
                                 style="font-size: 1.5em;"></i>
                         </a>
-                        <a class="me-2 no-underline" href="#">
+                        <a class="me-2 no-underline" target="_blank" href="https://www.instagram.com/infocusfr_/">
                             <i class="bx bxl-instagram border rounded-full bg-white text-gray-700"
+                                style="font-size: 1.5em;"></i>
+                        </a>
+                        <a class="me-2 no-underline" target="_blank" href="https://www.tiktok.com/@infocusfr">
+                            <i class="bx bxl-tiktok border rounded-full bg-white text-gray-700"
+                                style="font-size: 1.5em;"></i>
+                        </a>
+                        <a class="me-2 no-underline" target="_blank" href="https://www.linkedin.com/company/in-focusfr/">
+                            <i class="bx bxl-linkedin border rounded-full bg-white text-gray-700"
                                 style="font-size: 1.5em;"></i>
                         </a>
                     </div>
