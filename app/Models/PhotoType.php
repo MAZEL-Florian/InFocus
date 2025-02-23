@@ -31,6 +31,6 @@ class PhotoType extends Model
 
     public function photoTypePhotos()
     {
-        return $this->belongsToMany(Photo::class);
+        return $this->belongsToMany(Photo::class, 'photo_type_photos');
     }
 }

@@ -22,9 +22,35 @@ class SimulationController extends Controller
 
     public function photoType()
     {
-        $photoTypes = PhotoType::all();
-        return view('simulations.photoType', compact('photoTypes'));
+        // D'abord, récupérer les types de photographie qui ont au moins 30 photos par marque
+        $photoTypes = PhotoType::whereHas('photoTypePhotos', function ($q) {
+                $q->where('make', 'Canon');
+            }, '>=', 30)
+            ->whereHas('photoTypePhotos', function ($q) {
+                $q->where('make', 'NIKON CORPORATION');
+            }, '>=', 30)
+            ->whereHas('photoTypePhotos', function ($q) {
+                $q->where('make', 'SONY');
+            }, '>=', 30)
+            ->get();
+    
+        // Filtrer en mémoire pour vérifier qu'il existe au moins 3 focales distinctes
+        // et 3 ouvertures distinctes par marque.
+        $brands = ['Canon', 'NIKON CORPORATION', 'SONY'];
+        $validPhotoTypes = $photoTypes->filter(function ($photoType) use ($brands) {
+            foreach ($brands as $brand) {
+                $photos = $photoType->photoTypePhotos()->where('make', $brand)->get();
+                if ($photos->pluck('focal_length')->unique()->count() < 3 ||
+                    $photos->pluck('aperture')->unique()->count() < 3) {
+                    return false;
+                }
+            }
+            return true;
+        });
+    
+        return view('simulations.photoType', compact('photoTypes'))->with('photoTypes', $validPhotoTypes);
     }
+    
 
     public function store(Request $request)
     {
@@ -48,13 +74,13 @@ class SimulationController extends Controller
     // --------------------------------------------------------
     public function createStepOne(Request $request, Simulation $simulation)
     {
+
         $photos = Photo::select('photos.*')
             ->join('photo_type_photos', 'photos.id', '=', 'photo_type_photos.photo_id')
             ->join('photo_types', 'photo_type_photos.photo_type_id', '=', 'photo_types.id')
             ->where('photo_types.id', '=', $simulation->photo_type_id)
             ->get()
             ->groupBy('make');
-
         foreach ($photos as $make => $collection) {
             $photos[$make] = $collection->shuffle();
         }
@@ -75,7 +101,13 @@ class SimulationController extends Controller
         foreach ($selectedPhotos as $index => $series) {
             $selectedPhotos[$index] = array_slice($series, 0, $photosPerSeries);
         }
-
+        $expectedBrands = collect(['Canon', 'NIKON CORPORATION', 'SONY'])->sort()->values()->all();
+        foreach ($selectedPhotos as $series) {
+            $seriesBrands = collect($series)->pluck('make')->unique()->sort()->values()->all();
+            if ($seriesBrands !== $expectedBrands) {
+                return redirect()->back()->withErrors(['error' => "Chaque série doit contenir une photo de chaque marque (Canon, NIKON CORPORATION, SONY)."]);
+            }
+        }
         $photoType = $simulation->photoType;
         return view('simulations.step', [
             'currentStep' => 1,
@@ -126,6 +158,9 @@ class SimulationController extends Controller
     // --------------------------------------------------------
     public function createStepTwo(Request $request, Simulation $simulation)
     {
+        $maxSeries      = 3;
+        $photosPerSeries = 3;
+        $selectedPhotos = [];
 
         $dominantMake = $simulation->dominant_make;
 
@@ -138,11 +173,8 @@ class SimulationController extends Controller
                 ->get()
                 ->shuffle();
 
-            $maxSeries      = 3;
-            $photosPerSeries = 3;
-            $selectedPhotos = [];
             $usedPhotoIds   = [];
-           
+
             for ($series = 0; $series < $maxSeries; $series++) {
                 $available = $photos->reject(fn($p) => in_array($p->id, $usedPhotoIds));
                 foreach ($available as $photo) {
@@ -164,10 +196,6 @@ class SimulationController extends Controller
                 $grouped[$make] = $col->shuffle();
             }
 
-            $selectedPhotos = [];
-            $maxSeries      = 3;
-            $photosPerSeries = 3;
-
             for ($series = 0; $series < $maxSeries; $series++) {
                 foreach ($grouped as $make => $photoGroup) {
                     $photoIndex = $series;
@@ -177,6 +205,7 @@ class SimulationController extends Controller
                 }
             }
         }
+
         $alreadyActive = [0, 1, 2];
 
         $circleOffset = 3;
@@ -242,6 +271,11 @@ class SimulationController extends Controller
         $photosStepOne = $this->getPhotosForStep($simulation, 1);
         $allPhotos     = $photosStepOne->merge($photosStepTwo);
         $dominantMake  = $this->findDominantMake($allPhotos);
+
+        $photosPerSeries = 3;
+        $maxSeries = 3;
+        $selectedPhotos = [];
+
         if ($dominantMake) {
             $photos = Photo::whereHas('photoTypes', function ($q) use ($simulation) {
                 $q->where('photo_types.id', $simulation->photo_type_id);
@@ -251,64 +285,54 @@ class SimulationController extends Controller
                 ->get()
                 ->shuffle();
 
-            $maxSeries = 3;
-            $photosPerSeries = 3;
-            $selectedPhotosBySeries = [];
+
             $usedPhotoIds = [];
 
             for ($series = 0; $series < $maxSeries; $series++) {
                 $available = $photos->reject(fn($p) => in_array($p->id, $usedPhotoIds));
                 $usedApertures = [];
                 foreach ($available as $photo) {
-                    if (count($selectedPhotosBySeries[$series] ?? []) < $photosPerSeries) {
+                    if (count($selectedPhotos[$series] ?? []) < $photosPerSeries) {
                         $ap = $photo->aperture;
                         if (! in_array($ap, $usedApertures)) {
-                            $selectedPhotosBySeries[$series][] = $photo;
+                            $selectedPhotos[$series][] = $photo;
                             $usedPhotoIds[] = $photo->id;
                             $usedApertures[] = $ap;
                         }
                     }
                 }
             }
-
-            // return view('simulations.step-three', [
-            //     'photosByGroups' => $selectedPhotosBySeries,
-            //     'simulation'     => $simulation,
-            // ]);
         } else {
-            $photosAll = Photo::whereHas('photoTypes', function ($q) use ($simulation) {
+            $photos = Photo::whereHas('photoTypes', function ($q) use ($simulation) {
                 $q->where('photo_types.id', $simulation->photo_type_id);
             })
                 ->orderBy('aperture')
                 ->get();
 
-            $grouped = $photosAll->groupBy('make');
+            $grouped = $photos->groupBy('make');
             foreach ($grouped as $make => $col) {
                 $grouped[$make] = $col->shuffle();
             }
-
-            $maxSeries = 3;
-            $photosPerSeries = 3;
-            $selectedPhotosBySeries = [];
 
             for ($series = 0; $series < $maxSeries; $series++) {
                 foreach ($grouped as $make => $photoGroup) {
                     $photoIndex = $series;
                     if (isset($photoGroup[$photoIndex])) {
-                        $selectedPhotosBySeries[$series][] = $photoGroup[$photoIndex];
+                        $selectedPhotos[$series][] = $photoGroup[$photoIndex];
                     }
                 }
             }
         }
-        $alreadyActive = [0, 1, 2, 3, 4, 5];
 
+        $alreadyActive = [0, 1, 2, 3, 4, 5];
         $circleOffset = 6;
+
         return view('simulations.step', [
             'currentStep' => 3,
             'overlayTitle' => 'Parlons peu parlons ouverture.',
             'overlayDescription' => 'Ma partie préférée, c’est le flou d’arrière plan. Choisi celui que tu trouve le plus agréable à regarder selon toi. N’aie pas peur tous les objectifs sont capables de faire un arrière plan net. <br>C’est ce qui fini de déterminer tes objectifs.',
             'overlayButtonText' => 'Commencer',
-            'photosByGroups' => $selectedPhotosBySeries,
+            'photosByGroups' => $selectedPhotos,
 
             'circleOffset'   => $circleOffset,
             'forceCircles'   => $alreadyActive,
