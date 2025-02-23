@@ -1,93 +1,95 @@
 <x-guest-layout>
     <section class=" bg-gradient-to-b from-infocus-twilightblue via-infocus-intenseblue to-infocus-twilightblue">
 
-    <section class="relative min-h-screen flex items-center justify-center">
-        <video class="absolute w-full h-full object-cover object-center z-0" style="opacity: 0.5;" autoplay muted loop
-            playsinline>
-            <source src="https://s3-figma-videos-production-sig.figma.com/video/TEAM/1151811939967604798/f5cf4825b9e9f44e3d20e493f956d4b625e99bd3?Expires=1740355200&Key-Pair-Id=APKAQ4GOSFWCW27IBOMQ&Signature=qldpba1ugbH5UPDW6iOBmOnY~Wga-S7vQtjKHSLmOvBRrPu2skpUlXhUFwuPPjNekpTwkOphnLyN60z4L79mscsz1clf8dOUhLy8pEn3dbcXXZrFkrAyofFh-OUAc4L~zVYB2wmjgXul62~FIyLOT5vJU2FXgZVpyH2QKCjaXsU1uVill7ohqGvcZrzzfe15kA1YQPGn1hFZDwEF0tI72yUmDRVOGHgP8pWoSDv6tb8bAi1pAk-cc1nmetu6uM3YpOvNgcY6AYZh3S4r6cqaj3DgyCOUrwrOzckhwwRwoz~yjq5oxstorkuoZ-JJED~Xu~I33A9R7XvDtDOWq1YZDQ__" type="video/mp4" />
-            Votre navigateur ne supporte pas l'élément vidéo.
-        </video>
+        <section class="relative min-h-screen flex items-center justify-center">
+            <video class="absolute w-full h-full object-cover object-center z-0" style="opacity: 0.5;" autoplay muted
+                loop playsinline>
+                <source
+                    src="https://s3-figma-videos-production-sig.figma.com/video/TEAM/1151811939967604798/f5cf4825b9e9f44e3d20e493f956d4b625e99bd3?Expires=1740355200&Key-Pair-Id=APKAQ4GOSFWCW27IBOMQ&Signature=qldpba1ugbH5UPDW6iOBmOnY~Wga-S7vQtjKHSLmOvBRrPu2skpUlXhUFwuPPjNekpTwkOphnLyN60z4L79mscsz1clf8dOUhLy8pEn3dbcXXZrFkrAyofFh-OUAc4L~zVYB2wmjgXul62~FIyLOT5vJU2FXgZVpyH2QKCjaXsU1uVill7ohqGvcZrzzfe15kA1YQPGn1hFZDwEF0tI72yUmDRVOGHgP8pWoSDv6tb8bAi1pAk-cc1nmetu6uM3YpOvNgcY6AYZh3S4r6cqaj3DgyCOUrwrOzckhwwRwoz~yjq5oxstorkuoZ-JJED~Xu~I33A9R7XvDtDOWq1YZDQ__"
+                    type="video/mp4" />
+                Votre navigateur ne supporte pas l'élément vidéo.
+            </video>
 
-        <div class="absolute inset-0 bg-black bg-opacity-50"></div>
+            <div class="absolute inset-0 bg-black bg-opacity-50"></div>
 
-        <div class="relative z-10 px-4 text-center max-w-xl mx-auto">
-            <h1 class="text-4xl md:text-5xl font-semibold text-infocus-icewhite mb-6">
-                Louer ton matériel n’a jamais été aussi simple
-            </h1>
-            <p class="text-infocus-icewhite text-lg md:text-xl mb-8">
-                Découvre une nouvelle manière de louer : notre formulaire intelligent crée
-                des recommandations sur-mesure pour t’offrir le pack photo adapté à tes
-                besoins et tes ambitions.
-            </p>
-            <a href="{{ route('simulation.index') }}"
-                class="infocus-btn-primary text-infocus-twilightblue py-3 px-6 rounded font-medium inline-block">
-                Trouver mon matériel idéal
-            </a>
-        </div>
-    </section>
+            <div class="relative z-10 px-4 text-center max-w-xl mx-auto">
+                <h1 class="text-4xl md:text-5xl font-semibold text-infocus-icewhite mb-6">
+                    Louer ton matériel n’a jamais été aussi simple
+                </h1>
+                <p class="text-infocus-icewhite text-lg md:text-xl mb-8">
+                    Découvre une nouvelle manière de louer : notre formulaire intelligent crée
+                    des recommandations sur-mesure pour t’offrir le pack photo adapté à tes
+                    besoins et tes ambitions.
+                </p>
+                <a href="{{ route('simulation.index') }}"
+                    class="infocus-btn-primary text-infocus-twilightblue py-3 px-6 rounded font-medium inline-block">
+                    Trouver mon matériel idéal
+                </a>
+            </div>
+        </section>
 
-    {{-- DÉCOUVRE NOS STYLES PHOTOGRAPHIQUES --}}
-    @if ($photoTypes->isNotEmpty())
-    <section class="py-16">
-        <div class="container mx-auto text-center text-infocus-icewhite">
-            <h2 class="text-4xl font-semibold mb-10">
-                Découvre nos styles photographiques
-            </h2>
+        {{-- DÉCOUVRE NOS STYLES PHOTOGRAPHIQUES --}}
+        @if ($photoTypes->isNotEmpty())
+        <section class="py-16">
+            <div class="container mx-auto text-center text-infocus-icewhite">
+                <h2 class="text-4xl font-semibold mb-10">
+                    Découvre nos styles photographiques
+                </h2>
 
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
-                @foreach ($photoTypes as $photoType)
-                <div class="relative group">
-                    <img src="{{ asset('storage/' . $photoType->image_url) }}" alt="{{ $photoType->name }}"
-                        class="w-full h-64 object-cover rounded-lg transition duration-300 ease-in-out transform group-hover:scale-105 group-hover:brightness-75" />
-                    <div class="absolute inset-0 flex items-end p-4">
-                        <div class="text-left">
-                            <h3 class="text-xl md:text-2xl font-semibold text-infocus-icewhite">
-                                {{ $photoType->name }}
-                            </h3>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                    @foreach ($photoTypes as $photoType)
+                    <div class="relative group">
+                        <img src="{{ asset('storage/' . $photoType->image_url) }}" alt="{{ $photoType->name }}"
+                            class="w-full h-64 object-cover rounded-lg transition duration-300 ease-in-out transform group-hover:scale-105 group-hover:brightness-75" />
+                        <div class="absolute inset-0 flex items-end p-4">
+                            <div class="text-left">
+                                <h3 class="text-xl md:text-2xl font-semibold text-infocus-icewhite">
+                                    {{ $photoType->name }}
+                                </h3>
+                            </div>
                         </div>
                     </div>
+                    @endforeach
                 </div>
-                @endforeach
             </div>
-        </div>
-    </section>
-    @endif
+        </section>
+        @endif
 
-    {{-- LE FONCTIONNEMENT --}}
-    <section class="text-infocus-icewhite py-16">
-        <div class="container mx-auto">
-            <h2 class="text-4xl mb-10 font-semibold pb-20 text-center">
-                Le fonctionnement
-            </h2>
+        {{-- LE FONCTIONNEMENT --}}
+        <section class="text-infocus-icewhite py-16">
+            <div class="container mx-auto">
+                <h2 class="text-4xl mb-10 font-semibold pb-20 text-center">
+                    Le fonctionnement
+                </h2>
 
-            <div class="flex flex-col md:flex-row md:justify-center gap-8 md:gap-6 w-full max-w-5xl mx-auto">
-                <div class="bg-infocus-icewhite text-black rounded-xl p-8 flex-1">
-                    <h3 class="text-infocus-redphoto text-4xl font-bold mb-2">01</h3>
-                    <p class="text-lg font-medium">
-                        Remplis notre formulaire interactif
-                    </p>
-                </div>
-
-                <div class="relative flex-1">
-                    <img src="/img/hikari-front-happy.png" alt="Chouette InFocus"
-                        class="absolute -top-36 left-1/2 transform -translate-x-1/2 w-48 h-48 z-0" />
-                    <div class="relative bg-infocus-icewhite text-black rounded-xl p-8 z-10">
-                        <h3 class="text-infocus-redphoto text-4xl font-bold mb-2">02</h3>
+                <div class="flex flex-col md:flex-row md:justify-center gap-8 md:gap-6 w-full max-w-5xl mx-auto">
+                    <div class="bg-infocus-icewhite text-black rounded-xl p-8 flex-1">
+                        <h3 class="text-infocus-redphoto text-4xl font-bold mb-2">01</h3>
                         <p class="text-lg font-medium">
-                            Sélectionne le pack qui te convient
+                            Remplis notre formulaire interactif
+                        </p>
+                    </div>
+
+                    <div class="relative flex-1">
+                        <img src="/img/hikari-front-happy.png" alt="Chouette InFocus"
+                            class="absolute -top-36 left-1/2 transform -translate-x-1/2 w-48 h-48 z-0 hidden md:block" />
+                        <div class="relative bg-infocus-icewhite text-black rounded-xl p-8 z-10">
+                            <h3 class="text-infocus-redphoto text-4xl font-bold mb-2">02</h3>
+                            <p class="text-lg font-medium">
+                                Sélectionne le pack qui te convient
+                            </p>
+                        </div>
+                    </div>
+
+                    <div class="bg-infocus-icewhite text-black rounded-xl p-8 flex-1">
+                        <h3 class="text-infocus-redphoto text-4xl font-bold mb-2">03</h3>
+                        <p class="text-lg font-medium">
+                            Loue ton matériel & ajuste ton budget
                         </p>
                     </div>
                 </div>
-
-                <div class="bg-infocus-icewhite text-black rounded-xl p-8 flex-1">
-                    <h3 class="text-infocus-redphoto text-4xl font-bold mb-2">03</h3>
-                    <p class="text-lg font-medium">
-                        Loue ton matériel & ajuste ton budget
-                    </p>
-                </div>
             </div>
-        </div>
-    </section>
+        </section>
     </section>
 
 
