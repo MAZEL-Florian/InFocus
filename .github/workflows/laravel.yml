@@ -136,11 +136,6 @@ jobs:
         password: ${{ secrets.FTP_PASSWORD }}
         local-dir: ./ 
         server-dir: /public_html/
-        dangerous-clean-slate: true
-        exclude: |
-          **/.env
-          **/storage/**
-          **/database/**
 
     - name: Run deployment commands on Hostinger via SSH
       if: success()
