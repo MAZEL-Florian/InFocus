@@ -7,7 +7,7 @@
 ])
 
 <x-app-layout>
-    <div class="relative py-24 bg-darkblue">
+    <div class="relative py-8 bg-darkblue">
         <div id="overlay"
              class="absolute inset-0 flex items-center justify-center z-10 transition-opacity duration-500 bg-black bg-opacity-50">
             <div class="text-center p-8 rounded-lg">
@@ -31,7 +31,7 @@
         </div>
 
         <div id="mainContent" class="w-full z-0">
-            <div class="flex items-center justify-center mb-8">
+            <div class="flex items-center justify-center">
                 <div class="flex items-center space-x-2">
                     <div id="circle-0" class="circle"></div>
                     <div id="circle-1" class="circle"></div>
