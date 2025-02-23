@@ -127,19 +127,6 @@ jobs:
       uses: actions/checkout@v2
     - name: Copy .env
       run: php -r "file_exists('.env') || copy('.env.example', '.env');"
-      
-    - name: Cleanup old files on Hostinger via SSH
-      uses: appleboy/ssh-action@master
-      with:
-        host: ${{ secrets.SSH_HOST }}
-        username: ${{ secrets.SSH_USERNAME }}
-        password: ${{ secrets.SSH_PASSWORD }}
-        port: ${{ secrets.SSH_PORT }}
-        script: |
-          cd /public_html/resources/views/
-          if [ -d "products" ]; then
-            rm -rf products
-          fi
 
     - name: Sync files to Hostinger via FTP
       uses: SamKirkland/FTP-Deploy-Action@4.1.0
