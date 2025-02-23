@@ -15,7 +15,7 @@
                     <x-nav-link class="text-infocus-icewhite" href="{{ route('pack.index') }}" :active="request()->routeIs('pack.index')">
                         {{ __('Our packs') }}
                     </x-nav-link>
-                    <x-nav-link class="text-infocus-icewhite" href="{{ route('product.index') }}" :active="request()->routeIs('product.index')">
+                    <x-nav-link class="text-infocus-icewhite" href="{{ route('material.index') }}" :active="request()->routeIs('material.index')">
                         {{ __('Our material') }}
                     </x-nav-link>
                     <x-nav-link class="text-infocus-icewhite" href="{{ route('blog.index') }}" :active="request()->routeIs('blog.index')">
@@ -120,8 +120,8 @@
             <x-responsive-nav-link class="text-infocus-icewhite" href="{{ route('pack.index') }}" :active="request()->routeIs('pack.index')">
                 {{ __('Our packs') }}
             </x-responsive-nav-link>
-            <x-responsive-nav-link class="text-infocus-icewhite" href="{{ route('product.index') }}" :active="request()->routeIs('product.index')">
-                {{ __('Our products') }}
+            <x-responsive-nav-link class="text-infocus-icewhite" href="{{ route('material.index') }}" :active="request()->routeIs('material.index')">
+                {{ __('Our material') }}
             </x-responsive-nav-link>
             <x-responsive-nav-link class="text-infocus-icewhite" href="{{ route('blog.index') }}" :active="request()->routeIs('blog.index')">
                 {{ __('Blog') }}

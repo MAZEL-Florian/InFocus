@@ -3,7 +3,7 @@
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\PackController;
-use App\Http\Controllers\ProductController;
+use App\Http\Controllers\MaterialController;
 use App\Http\Controllers\BlogController;
 use App\Http\Controllers\FaqController;
 use App\Http\Controllers\SimulationController;
@@ -25,7 +25,7 @@ Route::get('/', [HomeController::class, 'index'])->name('home.index');
 // PACKS
 Route::get('/packs', [PackController::class, 'index'])->name('pack.index');
 // PRODUCTS
-Route::get('/products', [ProductController::class, 'index'])->name('product.index');
+Route::get('/material', [MaterialController::class, 'index'])->name('material.index');
 // BLOG
 Route::get('/blog', [BlogController::class, 'index'])->name('blog.index');
 // FAQ

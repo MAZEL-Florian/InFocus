@@ -2,16 +2,20 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Partner;
+use App\Models\PhotoType;
 use Illuminate\Http\Request;
 
-class ProductController extends Controller
+class MaterialController extends Controller
 {
     /**
      * Display a listing of the resource.
      */
     public function index()
     {
-        return view('products.index');
+        $photoTypes = PhotoType::all();
+        $partners = Partner::all();
+        return view('material.index', compact('partners', 'photoTypes'));
     }
 
     /**

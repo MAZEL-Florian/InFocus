@@ -18,6 +18,9 @@
     <link rel="icon" type="image/x-icon" href="/img/Fav blanc couleur.png">
     <link rel="stylesheet" href="https://use.typekit.net/rio1oev.css">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Glide.js/3.2.0/glide.js"></script>
+    <!-- Swiper Styles -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
 
     <link
         href="https://fonts.googleapis.com/css2?family=ABeeZee:ital@0;1&family=Quicksand:wght@300..700&family=Ruthie&display=swap"
