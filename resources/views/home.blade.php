@@ -5,11 +5,10 @@
             <video class="absolute w-full h-full object-cover object-center z-0" style="opacity: 0.5;" autoplay muted
                 loop playsinline>
                 <source
-                    src="https://s3-figma-videos-production-sig.figma.com/video/TEAM/1151811939967604798/f5cf4825b9e9f44e3d20e493f956d4b625e99bd3?Expires=1740355200&Key-Pair-Id=APKAQ4GOSFWCW27IBOMQ&Signature=qldpba1ugbH5UPDW6iOBmOnY~Wga-S7vQtjKHSLmOvBRrPu2skpUlXhUFwuPPjNekpTwkOphnLyN60z4L79mscsz1clf8dOUhLy8pEn3dbcXXZrFkrAyofFh-OUAc4L~zVYB2wmjgXul62~FIyLOT5vJU2FXgZVpyH2QKCjaXsU1uVill7ohqGvcZrzzfe15kA1YQPGn1hFZDwEF0tI72yUmDRVOGHgP8pWoSDv6tb8bAi1pAk-cc1nmetu6uM3YpOvNgcY6AYZh3S4r6cqaj3DgyCOUrwrOzckhwwRwoz~yjq5oxstorkuoZ-JJED~Xu~I33A9R7XvDtDOWq1YZDQ__"
+                    src="https://www.dropbox.com/scl/fi/k56l5mr7l1h8k378mblbq/SHOWREEL_OFF_VOICE_INFOCUS_V1.mp4?rlkey=3cw09d1pu3zqyjrk5r6rmpziu&st=q75ld7ac&raw=1"
                     type="video/mp4" />
                 Votre navigateur ne supporte pas l'élément vidéo.
             </video>
-
             <div class="absolute inset-0 bg-black bg-opacity-50"></div>
 
             <div class="relative z-10 px-4 text-center max-w-xl mx-auto">
